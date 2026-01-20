@@ -1,0 +1,284 @@
+{
+  "info": {
+    "_postman_id": "group-documents-api-collection",
+    "name": "LiveChatLog - Group Documents API",
+    "description": "API collection for managing group documents with Firebase Storage",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "groupId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "documentId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login - Get Auth Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.accessToken) {",
+                  "    pm.collectionVariables.set('authToken', jsonData.accessToken);",
+                  "    console.log('Auth token saved to collection variables');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@livechatlog.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "auth", "login"]
+            },
+            "description": "Login to get JWT authentication token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Group Documents",
+      "item": [
+        {
+          "name": "Upload Document to Group",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.collectionVariables.set('documentId', jsonData.id);",
+                  "    console.log('Document ID saved:', jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select a file to upload (PDF, DOC, DOCX, XLS, XLSX, TXT, CSV, JPG, PNG, GIF, MP4, MOV - Max 10MB)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/groups/{{groupId}}/documents",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "groups", "{{groupId}}", "documents"]
+            },
+            "description": "Upload a single document to a group. File is stored in Firebase Storage.\n\n**Allowed file types:**\n- PDF\n- Word (DOC, DOCX)\n- Excel (XLS, XLSX)\n- Text (TXT, CSV)\n- Images (JPG, PNG, GIF)\n- Videos (MP4, MOV)\n\n**Max file size:** 10MB"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload PDF Document Example",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Upload a PDF file"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/groups/{{groupId}}/documents",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "groups", "{{groupId}}", "documents"]
+            },
+            "description": "Example: Upload a PDF document to group"
+          },
+          "response": []
+        },
+        {
+          "name": "Upload Image Document Example",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Upload an image file (JPG, PNG, GIF)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/groups/{{groupId}}/documents",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "groups", "{{groupId}}", "documents"]
+            },
+            "description": "Example: Upload an image document to group"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Documents for Group",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/groups/{{groupId}}/documents",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "groups", "{{groupId}}", "documents"]
+            },
+            "description": "Retrieve all documents associated with a specific group. Returns array of documents with metadata including:\n- Document ID\n- File name and original name\n- File URL (Firebase Storage)\n- File size and MIME type\n- Upload date and uploader info"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Document by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/groups/documents/{{documentId}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "groups", "documents", "{{documentId}}"]
+            },
+            "description": "Get detailed information about a specific document by its ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Document",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/groups/documents/{{documentId}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "groups", "documents", "{{documentId}}"]
+            },
+            "description": "Delete a document. This will:\n1. Remove the file from Firebase Storage\n2. Soft delete the record from the database\n\n**Note:** This is a permanent action. The file will be removed from cloud storage."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Document Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/groups/{{groupId}}/documents/stats",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "groups", "{{groupId}}", "documents", "stats"]
+            },
+            "description": "Get statistics for documents in a group:\n- Total number of documents\n- Total storage size used\n- Breakdown by document type"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Groups",
+      "item": [
+        {
+          "name": "Get All Groups",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.length > 0 && jsonData[0].id) {",
+                  "    pm.collectionVariables.set('groupId', jsonData[0].id);",
+                  "    console.log('Group ID saved:', jsonData[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/groups",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "groups"]
+            },
+            "description": "Get all groups to find a group ID for document upload"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Single Group",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/groups/{{groupId}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "groups", "{{groupId}}"]
+            },
+            "description": "Get details of a specific group"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

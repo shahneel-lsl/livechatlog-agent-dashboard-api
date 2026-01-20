@@ -1,0 +1,414 @@
+{
+  "info": {
+    "_postman_id": "chat-media-api-collection",
+    "name": "LiveChatLog - Chat Media API",
+    "description": "API collection for sending images, videos, GIFs, and documents in conversations",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "conversationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "threadId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "eventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "attachmentId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login - Get Auth Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.accessToken) {",
+                  "    pm.collectionVariables.set('authToken', jsonData.accessToken);",
+                  "    console.log('Auth token saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@livechatlog.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "auth", "login"]
+            },
+            "description": "Login to get JWT authentication token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Chat Media",
+      "item": [
+        {
+          "name": "Send Image to Conversation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.id) {",
+                  "    pm.collectionVariables.set('eventId', jsonData.id);",
+                  "    if (jsonData.metadata && jsonData.metadata.attachments && jsonData.metadata.attachments.length > 0) {",
+                  "        pm.collectionVariables.set('attachmentId', jsonData.metadata.attachments[0].id);",
+                  "        console.log('Media uploaded:', jsonData.metadata.attachments[0].name);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select an image file (JPG, PNG, GIF, WEBP)"
+                },
+                {
+                  "key": "caption",
+                  "value": "Check out this image!",
+                  "description": "Optional caption for the image",
+                  "type": "text"
+                },
+                {
+                  "key": "authorType",
+                  "value": "agent",
+                  "description": "Who is sending: agent | visitor | system",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/conversations/{{conversationId}}/media",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "media"]
+            },
+            "description": "Upload and send an image in a conversation.\n\n**Supported formats:**\n- Images: JPG, PNG, GIF, WEBP\n- Max size: 10MB\n\n**Fields:**\n- `file`: The image file (required)\n- `caption`: Optional text caption\n- `authorType`: agent | visitor | system"
+          },
+          "response": []
+        },
+        {
+          "name": "Send Video to Conversation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select a video file (MP4, MOV, AVI, WEBM)"
+                },
+                {
+                  "key": "caption",
+                  "value": "Video demonstration",
+                  "description": "Optional caption",
+                  "type": "text"
+                },
+                {
+                  "key": "authorType",
+                  "value": "agent",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/conversations/{{conversationId}}/media",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "media"]
+            },
+            "description": "Upload and send a video in a conversation.\n\n**Supported formats:**\n- Videos: MP4, MOV, AVI, WEBM\n- Max size: 10MB"
+          },
+          "response": []
+        },
+        {
+          "name": "Send GIF to Conversation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select a GIF file"
+                },
+                {
+                  "key": "caption",
+                  "value": "😄",
+                  "type": "text"
+                },
+                {
+                  "key": "authorType",
+                  "value": "agent",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/conversations/{{conversationId}}/media",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "media"]
+            },
+            "description": "Upload and send a GIF animation in a conversation.\n\n**Format:** image/gif\n**Max size:** 10MB"
+          },
+          "response": []
+        },
+        {
+          "name": "Send Document to Conversation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select a document (PDF, DOC, DOCX, XLS, XLSX, TXT, CSV)"
+                },
+                {
+                  "key": "caption",
+                  "value": "Please review this document",
+                  "type": "text"
+                },
+                {
+                  "key": "authorType",
+                  "value": "agent",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/conversations/{{conversationId}}/media",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "media"]
+            },
+            "description": "Upload and send a document in a conversation.\n\n**Supported formats:**\n- PDF\n- Word: DOC, DOCX\n- Excel: XLS, XLSX\n- Text: TXT, CSV\n\n**Max size:** 10MB"
+          },
+          "response": []
+        },
+        {
+          "name": "Send Media to Specific Thread",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Any supported media file"
+                },
+                {
+                  "key": "caption",
+                  "value": "Message in specific thread",
+                  "type": "text"
+                },
+                {
+                  "key": "authorType",
+                  "value": "agent",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/threads/{{threadId}}/media?conversationId={{conversationId}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "threads", "{{threadId}}", "media"],
+              "query": [
+                {
+                  "key": "conversationId",
+                  "value": "{{conversationId}}",
+                  "description": "Required: Conversation ID"
+                }
+              ]
+            },
+            "description": "Upload and send media to a specific thread.\n\n**Query Parameter:**\n- `conversationId`: Required for Firebase sync"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Media from Conversation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/conversations/{{conversationId}}/media",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "media"]
+            },
+            "description": "Retrieve all media messages from a conversation.\n\n**Returns:**\n- Array of events with media attachments\n- Each attachment contains: id, type, name, url, size, mimeType"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Media Attachment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/events/{{eventId}}/media/{{attachmentId}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "events", "{{eventId}}", "media", "{{attachmentId}}"]
+            },
+            "description": "Delete a media attachment from an event.\n\n**This will:**\n1. Delete the file from Firebase Storage\n2. Remove the attachment from the event metadata\n3. Update hasMedia flag if no attachments remain"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Conversations",
+      "item": [
+        {
+          "name": "Get Conversations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.length > 0) {",
+                  "    pm.collectionVariables.set('conversationId', jsonData.data[0].id);",
+                  "    console.log('Conversation ID saved:', jsonData.data[0].id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/conversations",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "conversations"]
+            },
+            "description": "Get all conversations to find a conversation ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Conversation Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/conversations/{{conversationId}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "conversations", "{{conversationId}}"]
+            },
+            "description": "Get details of a specific conversation including threads"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Thread Events",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.length > 0) {",
+                  "    // Find first event with media",
+                  "    var mediaEvent = jsonData.find(e => e.metadata && e.metadata.hasMedia);",
+                  "    if (mediaEvent) {",
+                  "        pm.collectionVariables.set('eventId', mediaEvent.id);",
+                  "        if (mediaEvent.metadata.attachments && mediaEvent.metadata.attachments.length > 0) {",
+                  "            pm.collectionVariables.set('attachmentId', mediaEvent.metadata.attachments[0].id);",
+                  "        }",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/threads/{{threadId}}/events",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "threads", "{{threadId}}", "events"]
+            },
+            "description": "Get all events (messages) from a thread, including media messages"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

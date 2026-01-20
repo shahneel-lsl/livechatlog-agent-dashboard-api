@@ -1,0 +1,580 @@
+{
+  "info": {
+    "_postman_id": "agent-status-management-api",
+    "name": "Agent Status Management API",
+    "description": "API collection for managing agent status, sessions, schedules, and availability in LiveChatLog Dashboard.\n\n## Features\n- Agent status management (online/offline/away/busy/available)\n- Status indicators with current state display\n- Auto-away triggers after inactivity\n- Schedule-based availability override\n- Session timeout handling\n- Auto-logout & re-auth prompts\n\n## Authentication\nAll endpoints (except login) require a Bearer token in the Authorization header.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Authentication endpoints for login and profile",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', jsonData.access_token);",
+                  "    console.log('Token saved to collection variables');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"agent@example.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "auth", "login"]
+            },
+            "description": "Login with email and password to get access token. The token is automatically saved to collection variables."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "auth", "me"]
+            },
+            "description": "Get the current authenticated agent's profile"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Agent Status Management",
+      "description": "Endpoints for managing agent status (online/offline/away/busy/available)",
+      "item": [
+        {
+          "name": "Get My Status Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/agent-status/me",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "agent-status", "me"]
+            },
+            "description": "Get comprehensive status details for the current agent including:\n- Current status\n- Activity timestamps\n- Session info\n- Workload metrics\n- Schedule information"
+          },
+          "response": []
+        },
+        {
+          "name": "Update My Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"status\": \"online\",\n    \"reason\": \"Starting my shift\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/agent-status/me",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "agent-status", "me"]
+            },
+            "description": "Update the current agent's status.\n\nAvailable statuses:\n- `online` - Agent is online and ready\n- `offline` - Agent is offline\n- `away` - Agent is away (can be set manually or auto-triggered)\n- `busy` - Agent is busy (auto-set when at max capacity)\n- `available` - Agent is available and accepting chats"
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Online/Offline",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/agent-status/me/toggle-online",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "agent-status", "me", "toggle-online"]
+            },
+            "description": "Toggle between online and offline status. If currently offline, switches to online. If online/away/busy, switches to offline."
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Accepting Chats",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"acceptingChats\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/agent-status/me/accepting-chats",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "agent-status", "me", "accepting-chats"]
+            },
+            "description": "Enable or disable accepting new chat assignments while remaining online."
+          },
+          "response": []
+        },
+        {
+          "name": "Heartbeat (Record Activity)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/agent-status/me/heartbeat",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "agent-status", "me", "heartbeat"]
+            },
+            "description": "Record activity to prevent auto-away trigger. Call this periodically (e.g., every 5 minutes) to keep the session active."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Auto-Away Settings",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"autoAwayMinutes\": 15,\n    \"sessionTimeoutMinutes\": 60,\n    \"scheduleEnabled\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/agent-status/me/settings",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "agent-status", "me", "settings"]
+            },
+            "description": "Update auto-away and session timeout settings.\n\n- `autoAwayMinutes`: Minutes of inactivity before auto-away (1-120, default: 15)\n- `sessionTimeoutMinutes`: Minutes before session timeout (5-480, default: 60)\n- `scheduleEnabled`: Enable/disable schedule-based availability"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Status History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/agent-status/me/history?limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "agent-status", "me", "history"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Number of records to return (default: 50)"
+                }
+              ]
+            },
+            "description": "Get the history of status changes for the current agent."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Online Agents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/agent-status/online",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "agent-status", "online"]
+            },
+            "description": "Get list of all agents who are currently online (includes online, available, and busy statuses)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Status Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/agent-status/summary",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "agent-status", "summary"]
+            },
+            "description": "Get summary of all agent statuses (admin/supervisor view). Shows counts by status type."
+          },
+          "response": []
+        },
+        {
+          "name": "Force Logout Agent (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reason\": \"Security policy violation\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/agent-status/:agentId/force-logout",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "agent-status", ":agentId", "force-logout"],
+              "variable": [
+                {
+                  "key": "agentId",
+                  "value": "agent-uuid-here",
+                  "description": "The ID of the agent to force logout"
+                }
+              ]
+            },
+            "description": "Force logout another agent (admin/supervisor only). Sets the agent to offline and terminates all their sessions."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Schedule Management",
+      "description": "Endpoints for managing agent work schedules for automatic availability",
+      "item": [
+        {
+          "name": "Get My Schedules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/agent-status/me/schedules",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "agent-status", "me", "schedules"]
+            },
+            "description": "Get all work schedules for the current agent."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Schedule",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"dayOfWeek\": 0,\n    \"startTime\": \"09:00\",\n    \"endTime\": \"17:00\",\n    \"isActive\": true,\n    \"timezone\": \"America/New_York\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/agent-status/me/schedules",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "agent-status", "me", "schedules"]
+            },
+            "description": "Create a new work schedule entry.\n\nDays of week:\n- 0 = Monday\n- 1 = Tuesday\n- 2 = Wednesday\n- 3 = Thursday\n- 4 = Friday\n- 5 = Saturday\n- 6 = Sunday\n\nTime format: HH:mm (24-hour)"
+          },
+          "response": []
+        },
+        {
+          "name": "Set Weekly Schedule (Bulk)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n    {\n        \"dayOfWeek\": 0,\n        \"startTime\": \"09:00\",\n        \"endTime\": \"17:00\",\n        \"isActive\": true,\n        \"timezone\": \"America/New_York\"\n    },\n    {\n        \"dayOfWeek\": 1,\n        \"startTime\": \"09:00\",\n        \"endTime\": \"17:00\",\n        \"isActive\": true,\n        \"timezone\": \"America/New_York\"\n    },\n    {\n        \"dayOfWeek\": 2,\n        \"startTime\": \"09:00\",\n        \"endTime\": \"17:00\",\n        \"isActive\": true,\n        \"timezone\": \"America/New_York\"\n    },\n    {\n        \"dayOfWeek\": 3,\n        \"startTime\": \"09:00\",\n        \"endTime\": \"17:00\",\n        \"isActive\": true,\n        \"timezone\": \"America/New_York\"\n    },\n    {\n        \"dayOfWeek\": 4,\n        \"startTime\": \"09:00\",\n        \"endTime\": \"17:00\",\n        \"isActive\": true,\n        \"timezone\": \"America/New_York\"\n    }\n]"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/agent-status/me/schedules",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "agent-status", "me", "schedules"]
+            },
+            "description": "Replace all schedules with a new weekly schedule. Deletes existing schedules and creates new ones."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Schedule",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"startTime\": \"08:00\",\n    \"endTime\": \"16:00\",\n    \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/agent-status/me/schedules/:scheduleId",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "agent-status", "me", "schedules", ":scheduleId"],
+              "variable": [
+                {
+                  "key": "scheduleId",
+                  "value": "schedule-uuid-here",
+                  "description": "The ID of the schedule to update"
+                }
+              ]
+            },
+            "description": "Update an existing schedule entry."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Schedule",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/agent-status/me/schedules/:scheduleId",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "agent-status", "me", "schedules", ":scheduleId"],
+              "variable": [
+                {
+                  "key": "scheduleId",
+                  "value": "schedule-uuid-here",
+                  "description": "The ID of the schedule to delete"
+                }
+              ]
+            },
+            "description": "Delete a schedule entry."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Session Management",
+      "description": "Endpoints for managing agent sessions and handling timeouts",
+      "item": [
+        {
+          "name": "Get Active Sessions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/sessions",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sessions"]
+            },
+            "description": "Get all active sessions for the current agent."
+          },
+          "response": []
+        },
+        {
+          "name": "Check Re-auth Required",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/sessions/check-auth",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sessions", "check-auth"]
+            },
+            "description": "Check if the current session requires re-authentication. Returns `requiresReauth: true/false` with reason if applicable."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Session Stats (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/sessions/stats",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sessions", "stats"]
+            },
+            "description": "Get overall session statistics (active, expired, logged out counts)."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout Current Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reason\": \"End of shift\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sessions/logout",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sessions", "logout"]
+            },
+            "description": "Logout from the current session. If this is the last active session, agent status will be set to offline."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout All Sessions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reason\": \"Logging out from all devices\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/sessions/logout-all",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sessions", "logout-all"]
+            },
+            "description": "Logout from all active sessions. Agent status will be set to offline."
+          },
+          "response": []
+        },
+        {
+          "name": "Terminate Specific Session",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/sessions/:sessionId",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "sessions", ":sessionId"],
+              "variable": [
+                {
+                  "key": "sessionId",
+                  "value": "session-uuid-here",
+                  "description": "The ID of the session to terminate"
+                }
+              ]
+            },
+            "description": "Terminate a specific session by ID."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin Scheduler (Manual Triggers)",
+      "description": "Admin-only endpoints to manually trigger scheduled tasks (for testing)",
+      "item": [
+        {
+          "name": "Trigger Auto-Away Check",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/admin/scheduler/trigger-auto-away",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "admin", "scheduler", "trigger-auto-away"]
+            },
+            "description": "Manually trigger the auto-away check. Switches inactive agents to 'away' status."
+          },
+          "response": []
+        },
+        {
+          "name": "Trigger Session Timeout Check",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/admin/scheduler/trigger-session-timeout",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "admin", "scheduler", "trigger-session-timeout"]
+            },
+            "description": "Manually trigger session timeout check. Logs out agents with expired sessions."
+          },
+          "response": []
+        },
+        {
+          "name": "Trigger Schedule Check",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/admin/scheduler/trigger-schedule-check",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "admin", "scheduler", "trigger-schedule-check"]
+            },
+            "description": "Manually trigger schedule-based availability check. Updates agent status based on their work schedules."
+          },
+          "response": []
+        },
+        {
+          "name": "Trigger Overload Check",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/admin/scheduler/trigger-overload-check",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "admin", "scheduler", "trigger-overload-check"]
+            },
+            "description": "Manually trigger overload check. Switches agents at max capacity to 'busy' status."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

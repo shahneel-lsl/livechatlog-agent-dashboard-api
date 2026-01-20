@@ -1,0 +1,750 @@
+{
+  "info": {
+    "_postman_id": "chat-management-api-collection",
+    "name": "LiveChatLog - Chat Management API",
+    "description": "Complete API collection for chat management features including conversation list, close/reopen, tags, and bulk operations",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "conversationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tagId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "agentId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login - Get Auth Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.accessToken) {",
+                  "    pm.collectionVariables.set('authToken', jsonData.accessToken);",
+                  "    console.log('Auth token saved to collection variables');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@livechatlog.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Conversation List & Filters",
+      "item": [
+        {
+          "name": "Get All Conversations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations"]
+            },
+            "description": "Get all conversations without any filters"
+          }
+        },
+        {
+          "name": "Get Conversations - Filter by Status (Active)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations?status[]=active",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations"],
+              "query": [
+                {
+                  "key": "status[]",
+                  "value": "active"
+                }
+              ]
+            },
+            "description": "Filter conversations by active status"
+          }
+        },
+        {
+          "name": "Get Conversations - Filter by Status (Active & Pending)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations?status[]=active&status[]=pending",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations"],
+              "query": [
+                {
+                  "key": "status[]",
+                  "value": "active"
+                },
+                {
+                  "key": "status[]",
+                  "value": "pending"
+                }
+              ]
+            },
+            "description": "Filter conversations by multiple statuses"
+          }
+        },
+        {
+          "name": "Get Conversations - Filter by Closed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations?status[]=closed",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations"],
+              "query": [
+                {
+                  "key": "status[]",
+                  "value": "closed"
+                }
+              ]
+            },
+            "description": "Get all closed/archived conversations"
+          }
+        },
+        {
+          "name": "Get Conversations - Search by Keyword",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations?search=john",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "john"
+                }
+              ]
+            },
+            "description": "Search conversations by visitor name, email, or conversation ID"
+          }
+        },
+        {
+          "name": "Get Conversations - Sort by Newest",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations?sortBy=newest",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations"],
+              "query": [
+                {
+                  "key": "sortBy",
+                  "value": "newest"
+                }
+              ]
+            },
+            "description": "Sort conversations by newest first"
+          }
+        },
+        {
+          "name": "Get Conversations - Sort by Oldest",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations?sortBy=oldest",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations"],
+              "query": [
+                {
+                  "key": "sortBy",
+                  "value": "oldest"
+                }
+              ]
+            },
+            "description": "Sort conversations by oldest first"
+          }
+        },
+        {
+          "name": "Get Conversations - Filter by Tags",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations?tagIds[]=<tag-uuid>",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations"],
+              "query": [
+                {
+                  "key": "tagIds[]",
+                  "value": "<tag-uuid>",
+                  "description": "Replace with actual tag UUID"
+                }
+              ]
+            },
+            "description": "Filter conversations by tag IDs"
+          }
+        },
+        {
+          "name": "Get Conversations - Filter by Agent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations?agentId={{agentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations"],
+              "query": [
+                {
+                  "key": "agentId",
+                  "value": "{{agentId}}"
+                }
+              ]
+            },
+            "description": "Filter conversations by assigned agent"
+          }
+        },
+        {
+          "name": "Get Conversations - With Pagination",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get paginated conversations"
+          }
+        },
+        {
+          "name": "Get Conversations - Combined Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations?status[]=active&status[]=pending&sortBy=newest&page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations"],
+              "query": [
+                {
+                  "key": "status[]",
+                  "value": "active"
+                },
+                {
+                  "key": "status[]",
+                  "value": "pending"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "newest"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get conversations with multiple filters combined"
+          }
+        },
+        {
+          "name": "Get Single Conversation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/{{conversationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "{{conversationId}}"]
+            },
+            "description": "Get a single conversation by ID with all details"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Conversation Lifecycle",
+      "item": [
+        {
+          "name": "Close Conversation - Resolved",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reason\": \"resolved\",\n    \"notes\": \"Customer issue resolved successfully\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/{{conversationId}}/close",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "close"]
+            },
+            "description": "Close a conversation marking it as resolved. Closes the active thread."
+          }
+        },
+        {
+          "name": "Close Conversation - Spam",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reason\": \"spam\",\n    \"notes\": \"Marked as spam\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/{{conversationId}}/close",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "close"]
+            },
+            "description": "Close a conversation marking it as spam"
+          }
+        },
+        {
+          "name": "Close Conversation - Abandoned",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reason\": \"abandoned\",\n    \"notes\": \"Visitor left without response\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/{{conversationId}}/close",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "close"]
+            },
+            "description": "Close a conversation marking visitor abandoned"
+          }
+        },
+        {
+          "name": "Close Conversation - Transferred",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reason\": \"transferred\",\n    \"notes\": \"Transferred to support team\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/{{conversationId}}/close",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "close"]
+            },
+            "description": "Close a conversation after transfer"
+          }
+        },
+        {
+          "name": "Close Conversation - Other",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reason\": \"other\",\n    \"notes\": \"Custom close reason\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/{{conversationId}}/close",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "close"]
+            },
+            "description": "Close a conversation with custom reason"
+          }
+        },
+        {
+          "name": "Reopen Conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"reason\": \"Follow-up required\",\n    \"notes\": \"Customer requested additional information\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/{{conversationId}}/reopen",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "reopen"]
+            },
+            "description": "Reopen a closed conversation. Creates a new thread (LiveChat Inc style)."
+          }
+        },
+        {
+          "name": "Reopen Conversation - Minimal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/{{conversationId}}/reopen",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "reopen"]
+            },
+            "description": "Reopen a conversation with no reason (optional fields)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tag Management",
+      "item": [
+        {
+          "name": "Get All Tags",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/tags",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "tags"]
+            },
+            "description": "Get all available tags"
+          }
+        },
+        {
+          "name": "Create New Tag",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"sales\",\n    \"color\": \"#0066ff\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/tags",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "tags"]
+            },
+            "description": "Create a new tag"
+          }
+        },
+        {
+          "name": "Add Tags to Conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"tagIds\": [\"{{tagId}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/{{conversationId}}/tags",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "tags"]
+            },
+            "description": "Add one or more tags to a conversation"
+          }
+        },
+        {
+          "name": "Add Multiple Tags to Conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"tagIds\": [\"tag-uuid-1\", \"tag-uuid-2\", \"tag-uuid-3\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/{{conversationId}}/tags",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "tags"]
+            },
+            "description": "Add multiple tags to a conversation at once"
+          }
+        },
+        {
+          "name": "Remove Tag from Conversation",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/{{conversationId}}/tags/{{tagId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "tags", "{{tagId}}"]
+            },
+            "description": "Remove a single tag from a conversation"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bulk Operations",
+      "item": [
+        {
+          "name": "Bulk Close Conversations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"conversationIds\": [\"conv-uuid-1\", \"conv-uuid-2\", \"conv-uuid-3\"],\n    \"action\": \"close\",\n    \"reason\": \"End of day batch closure\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/bulk",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "bulk"]
+            },
+            "description": "Close multiple conversations at once"
+          }
+        },
+        {
+          "name": "Bulk Assign to Agent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"conversationIds\": [\"conv-uuid-1\", \"conv-uuid-2\"],\n    \"action\": \"assign\",\n    \"agentId\": \"{{agentId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/bulk",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "bulk"]
+            },
+            "description": "Assign multiple conversations to a single agent"
+          }
+        },
+        {
+          "name": "Bulk Add Tag",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"conversationIds\": [\"conv-uuid-1\", \"conv-uuid-2\", \"conv-uuid-3\"],\n    \"action\": \"add_tag\",\n    \"tagId\": \"{{tagId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/bulk",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "bulk"]
+            },
+            "description": "Add a tag to multiple conversations"
+          }
+        },
+        {
+          "name": "Bulk Remove Tag",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"conversationIds\": [\"conv-uuid-1\", \"conv-uuid-2\"],\n    \"action\": \"remove_tag\",\n    \"tagId\": \"{{tagId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/bulk",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "bulk"]
+            },
+            "description": "Remove a tag from multiple conversations"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Conversation Assignment",
+      "item": [
+        {
+          "name": "Assign Conversation to Agent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"agentId\": \"{{agentId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/{{conversationId}}/assign",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "assign"]
+            },
+            "description": "Assign a single conversation to an agent"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Thread & Events",
+      "item": [
+        {
+          "name": "Get Thread Events/Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/threads/<thread-id>/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "threads", "<thread-id>", "events"]
+            },
+            "description": "Get all events (messages) from a specific thread"
+          }
+        },
+        {
+          "name": "Send Message to Conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"content\": \"Hello, how can I help you today?\",\n    \"type\": \"message\",\n    \"authorType\": \"agent\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/conversations/{{conversationId}}/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "conversations", "{{conversationId}}", "events"]
+            },
+            "description": "Send a message to a conversation (auto-adds to active thread)"
+          }
+        }
+      ]
+    }
+  ]
+}

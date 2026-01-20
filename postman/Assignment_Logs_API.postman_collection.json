@@ -1,0 +1,560 @@
+{
+  "info": {
+    "name": "LiveChatLog - Assignment Logs API",
+    "description": "API endpoints for querying and analyzing agent assignment logs. All endpoints require JWT authentication.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "livechatlog-logs-api"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "your-jwt-token-here",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Get Assignment Logs (Filtered)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/logs/assignments?page=1&limit=50",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "logs", "assignments"],
+          "query": [
+            {
+              "key": "page",
+              "value": "1",
+              "description": "Page number (default: 1)"
+            },
+            {
+              "key": "limit",
+              "value": "50",
+              "description": "Items per page (default: 50)"
+            },
+            {
+              "key": "conversationId",
+              "value": "",
+              "description": "Filter by conversation ID",
+              "disabled": true
+            },
+            {
+              "key": "visitorId",
+              "value": "",
+              "description": "Filter by visitor ID",
+              "disabled": true
+            },
+            {
+              "key": "groupId",
+              "value": "",
+              "description": "Filter by group ID",
+              "disabled": true
+            },
+            {
+              "key": "agentId",
+              "value": "",
+              "description": "Filter by agent ID",
+              "disabled": true
+            },
+            {
+              "key": "level",
+              "value": "",
+              "description": "Filter by level: info, warning, error, success",
+              "disabled": true
+            },
+            {
+              "key": "type",
+              "value": "",
+              "description": "Filter by log type",
+              "disabled": true
+            },
+            {
+              "key": "startDate",
+              "value": "",
+              "description": "Start date (ISO format: 2025-12-01)",
+              "disabled": true
+            },
+            {
+              "key": "endDate",
+              "value": "",
+              "description": "End date (ISO format: 2025-12-31)",
+              "disabled": true
+            }
+          ]
+        },
+        "description": "Get assignment logs with optional filters. Returns paginated results with detailed log information."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Logs by Conversation ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/logs/assignments?conversationId=conv-123&page=1&limit=50",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "logs", "assignments"],
+          "query": [
+            {
+              "key": "conversationId",
+              "value": "conv-123",
+              "description": "Filter by specific conversation"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "50"
+            }
+          ]
+        },
+        "description": "Get all logs for a specific conversation ID."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Error Logs Only",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/logs/assignments?level=error&page=1&limit=50",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "logs", "assignments"],
+          "query": [
+            {
+              "key": "level",
+              "value": "error",
+              "description": "Show only ERROR level logs"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "50"
+            }
+          ]
+        },
+        "description": "Get only error-level logs for debugging critical issues."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Logs by Group ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/logs/assignments?groupId=group-123&page=1&limit=50",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "logs", "assignments"],
+          "query": [
+            {
+              "key": "groupId",
+              "value": "group-123",
+              "description": "Filter by specific group"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "50"
+            }
+          ]
+        },
+        "description": "Get all logs for a specific group to monitor group performance."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Logs by Date Range",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/logs/assignments?startDate=2025-12-01&endDate=2025-12-31&page=1&limit=50",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "logs", "assignments"],
+          "query": [
+            {
+              "key": "startDate",
+              "value": "2025-12-01",
+              "description": "Start date (ISO format)"
+            },
+            {
+              "key": "endDate",
+              "value": "2025-12-31",
+              "description": "End date (ISO format)"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "50"
+            }
+          ]
+        },
+        "description": "Get logs within a specific date range for monthly/weekly reports."
+      },
+      "response": []
+    },
+    {
+      "name": "Get No Online Agents Logs",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/logs/assignments?type=no_online_agents&page=1&limit=50",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "logs", "assignments"],
+          "query": [
+            {
+              "key": "type",
+              "value": "no_online_agents",
+              "description": "Filter by specific log type"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "50"
+            }
+          ]
+        },
+        "description": "Get logs showing when no online agents were available."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Logs Summary (Statistics)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/logs/summary",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "logs", "summary"],
+          "query": [
+            {
+              "key": "groupId",
+              "value": "",
+              "description": "Optional: Filter by group ID",
+              "disabled": true
+            },
+            {
+              "key": "startDate",
+              "value": "",
+              "description": "Optional: Start date (ISO format)",
+              "disabled": true
+            },
+            {
+              "key": "endDate",
+              "value": "",
+              "description": "Optional: End date (ISO format)",
+              "disabled": true
+            }
+          ]
+        },
+        "description": "Get summary statistics including success rate, failure count, and common failure reasons."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Summary for Specific Group",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/logs/summary?groupId=group-123",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "logs", "summary"],
+          "query": [
+            {
+              "key": "groupId",
+              "value": "group-123",
+              "description": "Filter statistics by group"
+            }
+          ]
+        },
+        "description": "Get summary statistics for a specific group."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Summary for Date Range",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/logs/summary?startDate=2025-12-01&endDate=2025-12-31",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "logs", "summary"],
+          "query": [
+            {
+              "key": "startDate",
+              "value": "2025-12-01",
+              "description": "Start date for statistics"
+            },
+            {
+              "key": "endDate",
+              "value": "2025-12-31",
+              "description": "End date for statistics"
+            }
+          ]
+        },
+        "description": "Get summary statistics for a specific date range (monthly report)."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Recent Issues",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/logs/issues?limit=20",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "logs", "issues"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "20",
+              "description": "Number of recent issues to return (default: 20)"
+            }
+          ]
+        },
+        "description": "Get the most recent ERROR and WARNING level logs for quick issue monitoring."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Recent 50 Issues",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/logs/issues?limit=50",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "logs", "issues"],
+          "query": [
+            {
+              "key": "limit",
+              "value": "50",
+              "description": "Get last 50 issues"
+            }
+          ]
+        },
+        "description": "Get the last 50 issues for deeper analysis."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Conversation Timeline",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/logs/conversation/:conversationId",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "logs", "conversation", ":conversationId"],
+          "variable": [
+            {
+              "key": "conversationId",
+              "value": "conv-123",
+              "description": "Conversation ID to get timeline for"
+            }
+          ]
+        },
+        "description": "Get complete timeline of all logs for a specific conversation in chronological order. Perfect for debugging specific visitor issues."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Group Performance Metrics",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/logs/group/:groupId/metrics?days=7",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "logs", "group", ":groupId", "metrics"],
+          "query": [
+            {
+              "key": "days",
+              "value": "7",
+              "description": "Number of days to analyze (default: 7)"
+            }
+          ],
+          "variable": [
+            {
+              "key": "groupId",
+              "value": "group-123",
+              "description": "Group ID to get metrics for"
+            }
+          ]
+        },
+        "description": "Get performance metrics for a specific group including success rate, total attempts, and issue breakdown."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Group Metrics (30 Days)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/logs/group/:groupId/metrics?days=30",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "logs", "group", ":groupId", "metrics"],
+          "query": [
+            {
+              "key": "days",
+              "value": "30",
+              "description": "Analyze last 30 days"
+            }
+          ],
+          "variable": [
+            {
+              "key": "groupId",
+              "value": "group-123",
+              "description": "Group ID"
+            }
+          ]
+        },
+        "description": "Get group performance metrics for the last 30 days."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Available Log Types",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/logs/types",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "logs", "types"]
+        },
+        "description": "Get all available log types and levels with descriptions. Useful for building UI filters and understanding log structure."
+      },
+      "response": []
+    }
+  ]
+}

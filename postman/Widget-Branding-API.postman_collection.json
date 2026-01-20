@@ -1,0 +1,572 @@
+{
+  "info": {
+    "_postman_id": "widget-branding-api-collection",
+    "name": "Widget Branding API",
+    "description": "Complete API collection for Widget Branding management in LiveChatLog Dashboard. This allows customization of chat widget appearance and behavior per group.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Media Upload",
+      "item": [
+        {
+          "name": "Upload Widget Media",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "description": "JWT token from login"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Image file to upload (JPEG, PNG, GIF, SVG, WEBP - max 5MB)"
+                },
+                {
+                  "key": "mediaType",
+                  "value": "logo",
+                  "type": "text",
+                  "description": "Type: logo, icon, or image (optional, defaults to 'image')"
+                },
+                {
+                  "key": "fileName",
+                  "value": "company-logo",
+                  "type": "text",
+                  "description": "Custom file name (optional). UUID will be appended automatically. Example: 'company-logo' becomes 'company-logo_uuid.png'"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/widget-media/upload",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "widget-media", "upload"]
+            },
+            "description": "Single unified endpoint to upload any widget media (logo, icon, or image) to Firebase Storage. Specify the mediaType to organize files into appropriate folders (widget_media/logos, widget_media/icons, or widget_media/images). Returns the public URL to use in widget branding API.\n\nMax file size: 5MB\nAllowed formats: JPEG, PNG, GIF, SVG, WEBP\n\nParameters:\n- file: The image file to upload (required)\n- mediaType: Type of media - 'logo', 'icon', or 'image' (optional, defaults to 'image')\n- fileName: Custom file name (optional). UUID will be appended automatically for uniqueness.\n\nExamples:\n- fileName='company-logo' → saved as 'company-logo_abc123-uuid.png'\n- fileName='chat-icon' → saved as 'chat-icon_xyz789-uuid.svg'\n- No fileName → saved as 'uuid_timestamp.png' (default)"
+          },
+          "response": [
+            {
+              "name": "Upload Logo Example",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": []
+                    },
+                    {
+                      "key": "mediaType",
+                      "value": "logo",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/widget-media/upload",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "widget-media", "upload"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"fileName\": \"company-logo_a1b2c3d4-e5f6-7890-abcd-ef1234567890.png\",\n  \"fileUrl\": \"https://storage.googleapis.com/your-bucket-name/widget_media/logos/company-logo_a1b2c3d4-e5f6-7890-abcd-ef1234567890.png\",\n  \"storagePath\": \"widget_media/logos/company-logo_a1b2c3d4-e5f6-7890-abcd-ef1234567890.png\",\n  \"mimeType\": \"image/png\",\n  \"fileSize\": 45678\n}"
+            },
+            {
+              "name": "Upload Icon Example",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": []
+                    },
+                    {
+                      "key": "mediaType",
+                      "value": "icon",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{base_url}}/v1/widget-media/upload",
+                  "host": ["{{base_url}}"],
+                  "path": ["v1", "widget-media", "upload"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"fileName\": \"xyz123-4567-8910-icon_1737849600000.svg\",\n  \"fileUrl\": \"https://storage.googleapis.com/your-bucket-name/widget_media/icons/xyz123-4567-8910-icon_1737849600000.svg\",\n  \"storagePath\": \"widget_media/icons/xyz123-4567-8910-icon_1737849600000.svg\",\n  \"mimeType\": \"image/svg+xml\",\n  \"fileSize\": 12345\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Widget Media",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}",
+                "description": "JWT token from login"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"storagePath\": \"widget_media/logos/a1b2c3d4-e5f6-7890-abcd-ef1234567890_1737849600000.png\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/v1/widget-media",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "widget-media"]
+            },
+            "description": "Delete a widget media file from Firebase Storage using its storage path."
+          },
+          "response": []
+        }
+      ],
+      "description": "Single unified endpoint for uploading any widget media (logos, icons, images) to Firebase Storage. Specify mediaType parameter to organize files into appropriate folders. Use the returned fileUrl in widget branding API."
+    },
+    {
+      "name": "Widget Branding",
+      "item": [
+        {
+          "name": "Create Widget Branding",
+          "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "JWT token from login"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"groupId\": \"{{group_id}}\",\n  \"brandTitle\": \"Customer Support\",\n  \"welcomeMessage\": \"Hello! How can we help you today?\",\n  \"offlineMessage\": \"We're currently offline. Leave us a message!\",\n  \"logoUrl\": \"https://example.com/logo.png\",\n  \"companyName\": \"Acme Corporation\",\n  \"primaryColor\": \"#0084FF\",\n  \"secondaryColor\": \"#FFFFFF\",\n  \"textColor\": \"#333333\",\n  \"headerTextColor\": \"#FFFFFF\",\n  \"buttonColor\": \"#0084FF\",\n  \"buttonTextColor\": \"#FFFFFF\",\n  \"backgroundColor\": \"#F5F5F5\",\n  \"agentBubbleColor\": \"#E8F4FD\",\n  \"visitorBubbleColor\": \"#0084FF\",\n  \"fontFamily\": \"Roboto, sans-serif\",\n  \"fontSize\": 14,\n  \"position\": \"bottom_right\",\n  \"size\": \"medium\",\n  \"theme\": \"light\",\n  \"borderRadius\": 12,\n  \"borderColor\": \"#CCCCCC\",\n  \"borderWidth\": 1,\n  \"customCss\": \".chat-container { box-shadow: 0 4px 6px rgba(0,0,0,0.1); }\",\n  \"showAgentAvatar\": true,\n  \"showAgentName\": true,\n  \"showTypingIndicator\": true,\n  \"soundNotificationEnabled\": true,\n  \"autoOpenWidget\": false,\n  \"autoOpenDelay\": 5,\n  \"showPoweredBy\": true,\n  \"enableFileUpload\": true,\n  \"enableEmojis\": true,\n  \"requirePreChatForm\": true,\n  \"preChatFormAskName\": true,\n  \"preChatFormAskEmail\": true,\n  \"preChatFormAskPhone\": false,\n  \"preChatFormCustomFields\": {\n    \"department\": {\n      \"type\": \"select\",\n      \"label\": \"Department\",\n      \"options\": [\"Sales\", \"Support\", \"Billing\"],\n      \"required\": true\n    },\n    \"priority\": {\n      \"type\": \"select\",\n      \"label\": \"Priority\",\n      \"options\": [\"Low\", \"Medium\", \"High\"],\n      \"required\": false\n    }\n  },\n  \"showBusinessHours\": true,\n  \"businessHours\": {\n    \"monday\": { \"start\": \"09:00\", \"end\": \"17:00\", \"enabled\": true },\n    \"tuesday\": { \"start\": \"09:00\", \"end\": \"17:00\", \"enabled\": true },\n    \"wednesday\": { \"start\": \"09:00\", \"end\": \"17:00\", \"enabled\": true },\n    \"thursday\": { \"start\": \"09:00\", \"end\": \"17:00\", \"enabled\": true },\n    \"friday\": { \"start\": \"09:00\", \"end\": \"17:00\", \"enabled\": true },\n    \"saturday\": { \"start\": \"10:00\", \"end\": \"14:00\", \"enabled\": false },\n    \"sunday\": { \"start\": \"10:00\", \"end\": \"14:00\", \"enabled\": false }\n  },\n  \"language\": \"en\",\n  \"timezone\": \"America/New_York\",\n  \"agentGreeting\": \"Hi there! I'm {{agent_name}}. How may I assist you?\",\n  \"noAgentsAvailableMessage\": \"All agents are currently busy. Please wait.\",\n  \"chatEndedMessage\": \"Thank you for chatting with us. Have a great day!\",\n  \"privacyPolicyUrl\": \"https://example.com/privacy\",\n  \"termsOfServiceUrl\": \"https://example.com/terms\",\n  \"enableTranscriptEmail\": true,\n  \"enableChatRating\": true,\n  \"maxAttachmentSizeMB\": 10,\n  \"allowedFileTypes\": [\"image/jpeg\", \"image/png\", \"application/pdf\", \"text/plain\"],\n  \"showOnMobile\": true,\n  \"showOnDesktop\": true,\n  \"buttonIconUrl\": \"https://example.com/chat-icon.svg\",\n  \"buttonText\": \"Chat Now\",\n  \"buttonSize\": 60,\n  \"enableAnimations\": true,\n  \"openAnimation\": \"bounce\",\n  \"closeAnimation\": \"fade\",\n  \"allowedDomains\": [\"example.com\", \"www.example.com\", \"app.example.com\"],\n  \"customMetadata\": \"{\\\"analytics_id\\\": \\\"GA-123456\\\", \\\"customer_segment\\\": \\\"premium\\\"}\",\n  \"isActive\": true\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/v1/widget-branding",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "widget-branding"]
+        },
+        "description": "Create a new widget branding configuration for a specific group. Each group can only have one branding configuration."
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Widget Brandings",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "JWT token from login"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/widget-branding",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "widget-branding"]
+        },
+        "description": "Retrieve all widget branding configurations (admin only)."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Widget Branding by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "JWT token from login"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/widget-branding/:id",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "widget-branding", ":id"],
+          "variable": [
+            {
+              "key": "id",
+              "value": "{{widget_branding_id}}",
+              "description": "Widget branding ID"
+            }
+          ]
+        },
+        "description": "Retrieve a specific widget branding configuration by its ID."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Widget Branding by Group ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "JWT token from login"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/widget-branding/group/:groupId",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "widget-branding", "group", ":groupId"],
+          "variable": [
+            {
+              "key": "groupId",
+              "value": "{{group_id}}",
+              "description": "Group ID"
+            }
+          ]
+        },
+        "description": "Retrieve widget branding configuration for a specific group. This is the main endpoint to fetch branding settings by group."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Public Widget Branding by Group ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/v1/widget-branding/public/group/:groupId",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "widget-branding", "public", "group", ":groupId"],
+          "variable": [
+            {
+              "key": "groupId",
+              "value": "{{group_id}}",
+              "description": "Group ID"
+            }
+          ]
+        },
+        "description": "Public endpoint to retrieve widget branding for embedding in customer websites. No authentication required. Returns sanitized branding data without sensitive information."
+      },
+      "response": []
+    },
+    {
+      "name": "Update Widget Branding by ID",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "JWT token from login"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"brandTitle\": \"24/7 Customer Support\",\n  \"primaryColor\": \"#FF6B6B\",\n  \"welcomeMessage\": \"Welcome! We're here to help 24/7.\",\n  \"fontSize\": 16,\n  \"enableChatRating\": true,\n  \"autoOpenWidget\": true,\n  \"autoOpenDelay\": 10\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/v1/widget-branding/:id",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "widget-branding", ":id"],
+          "variable": [
+            {
+              "key": "id",
+              "value": "{{widget_branding_id}}",
+              "description": "Widget branding ID"
+            }
+          ]
+        },
+        "description": "Update an existing widget branding configuration by ID. Only provided fields will be updated."
+      },
+      "response": []
+    },
+    {
+      "name": "Create or Update Widget Branding by Group ID",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "JWT token from login"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"brandTitle\": \"Sales Team Chat\",\n  \"primaryColor\": \"#28A745\",\n  \"secondaryColor\": \"#FFFFFF\",\n  \"welcomeMessage\": \"Hello! Ready to discuss your needs?\",\n  \"position\": \"bottom_left\",\n  \"theme\": \"dark\",\n  \"showAgentAvatar\": true,\n  \"enableFileUpload\": true,\n  \"requirePreChatForm\": false,\n  \"language\": \"en\",\n  \"isActive\": true\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/v1/widget-branding/group/:groupId",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "widget-branding", "group", ":groupId"],
+          "variable": [
+            {
+              "key": "groupId",
+              "value": "{{group_id}}",
+              "description": "Group ID"
+            }
+          ]
+        },
+        "description": "Create or update widget branding for a specific group. If branding doesn't exist, it will be created. If it exists, it will be updated. This is the recommended endpoint for upsert operations."
+      },
+      "response": []
+    },
+    {
+      "name": "Toggle Widget Branding Active Status",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "JWT token from login"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/widget-branding/:id/toggle-active",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "widget-branding", ":id", "toggle-active"],
+          "variable": [
+            {
+              "key": "id",
+              "value": "{{widget_branding_id}}",
+              "description": "Widget branding ID"
+            }
+          ]
+        },
+        "description": "Toggle the active status of a widget branding configuration. When inactive, the public endpoint will return default branding."
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Widget Branding by ID",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "JWT token from login"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/widget-branding/:id",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "widget-branding", ":id"],
+          "variable": [
+            {
+              "key": "id",
+              "value": "{{widget_branding_id}}",
+              "description": "Widget branding ID"
+            }
+          ]
+        },
+        "description": "Soft delete a widget branding configuration by ID. The configuration will be marked as deleted but not removed from the database."
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Widget Branding by Group ID",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "JWT token from login"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/widget-branding/group/:groupId",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "widget-branding", "group", ":groupId"],
+          "variable": [
+            {
+              "key": "groupId",
+              "value": "{{group_id}}",
+              "description": "Group ID"
+            }
+          ]
+        },
+        "description": "Soft delete widget branding configuration for a specific group."
+      },
+      "response": []
+    },
+    {
+      "name": "Minimal Widget Branding (Quick Setup)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "JWT token from login"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"brandTitle\": \"Support Chat\",\n  \"primaryColor\": \"#0084FF\",\n  \"welcomeMessage\": \"Hi! How can we help?\",\n  \"isActive\": true\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/v1/widget-branding/group/:groupId",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "widget-branding", "group", ":groupId"],
+          "variable": [
+            {
+              "key": "groupId",
+              "value": "{{group_id}}",
+              "description": "Group ID"
+            }
+          ]
+        },
+        "description": "Create widget branding with minimal required fields. All other settings will use default values. Perfect for quick setup."
+      },
+      "response": []
+    },
+    {
+      "name": "Advanced Customization Example",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "JWT token from login"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"brandTitle\": \"Premium Support\",\n  \"companyName\": \"TechCorp Inc.\",\n  \"logoUrl\": \"https://cdn.example.com/premium-logo.svg\",\n  \"primaryColor\": \"#6C5CE7\",\n  \"secondaryColor\": \"#FDCB6E\",\n  \"backgroundColor\": \"#2D3436\",\n  \"textColor\": \"#DFE6E9\",\n  \"headerTextColor\": \"#FFFFFF\",\n  \"agentBubbleColor\": \"#74B9FF\",\n  \"visitorBubbleColor\": \"#A29BFE\",\n  \"fontFamily\": \"'Inter', 'Segoe UI', sans-serif\",\n  \"fontSize\": 15,\n  \"position\": \"bottom_right\",\n  \"size\": \"large\",\n  \"theme\": \"dark\",\n  \"borderRadius\": 16,\n  \"borderColor\": \"#6C5CE7\",\n  \"borderWidth\": 2,\n  \"customCss\": \".chat-widget { backdrop-filter: blur(10px); background: rgba(45, 52, 54, 0.95); }\",\n  \"welcomeMessage\": \"Welcome to Premium Support! We're here to provide you with exceptional service.\",\n  \"offlineMessage\": \"Our premium support team is currently offline. Please leave your message and we'll respond within 2 hours.\",\n  \"agentGreeting\": \"Hello! I'm {{agent_name}} from the Premium Support team. How may I provide you with world-class assistance today?\",\n  \"noAgentsAvailableMessage\": \"All our premium agents are currently assisting other customers. Your estimated wait time is 2 minutes.\",\n  \"chatEndedMessage\": \"Thank you for choosing Premium Support. We hope we exceeded your expectations!\",\n  \"autoOpenWidget\": true,\n  \"autoOpenDelay\": 3,\n  \"showAgentAvatar\": true,\n  \"showAgentName\": true,\n  \"showTypingIndicator\": true,\n  \"soundNotificationEnabled\": true,\n  \"enableFileUpload\": true,\n  \"maxAttachmentSizeMB\": 25,\n  \"allowedFileTypes\": [\"image/jpeg\", \"image/png\", \"image/gif\", \"application/pdf\", \"text/plain\", \"application/zip\"],\n  \"enableEmojis\": true,\n  \"requirePreChatForm\": true,\n  \"preChatFormAskName\": true,\n  \"preChatFormAskEmail\": true,\n  \"preChatFormAskPhone\": true,\n  \"preChatFormCustomFields\": {\n    \"account_type\": {\n      \"type\": \"select\",\n      \"label\": \"Account Type\",\n      \"options\": [\"Premium\", \"Enterprise\", \"VIP\"],\n      \"required\": true\n    },\n    \"account_id\": {\n      \"type\": \"text\",\n      \"label\": \"Account ID\",\n      \"placeholder\": \"Enter your account ID\",\n      \"required\": true\n    },\n    \"issue_category\": {\n      \"type\": \"select\",\n      \"label\": \"Issue Category\",\n      \"options\": [\"Technical\", \"Billing\", \"Account\", \"Feature Request\", \"Other\"],\n      \"required\": true\n    }\n  },\n  \"showBusinessHours\": true,\n  \"businessHours\": {\n    \"monday\": { \"start\": \"08:00\", \"end\": \"20:00\", \"enabled\": true },\n    \"tuesday\": { \"start\": \"08:00\", \"end\": \"20:00\", \"enabled\": true },\n    \"wednesday\": { \"start\": \"08:00\", \"end\": \"20:00\", \"enabled\": true },\n    \"thursday\": { \"start\": \"08:00\", \"end\": \"20:00\", \"enabled\": true },\n    \"friday\": { \"start\": \"08:00\", \"end\": \"20:00\", \"enabled\": true },\n    \"saturday\": { \"start\": \"09:00\", \"end\": \"17:00\", \"enabled\": true },\n    \"sunday\": { \"start\": \"10:00\", \"end\": \"16:00\", \"enabled\": true }\n  },\n  \"language\": \"en\",\n  \"timezone\": \"America/Los_Angeles\",\n  \"privacyPolicyUrl\": \"https://techcorp.example.com/privacy\",\n  \"termsOfServiceUrl\": \"https://techcorp.example.com/terms\",\n  \"enableTranscriptEmail\": true,\n  \"enableChatRating\": true,\n  \"showOnMobile\": true,\n  \"showOnDesktop\": true,\n  \"buttonIconUrl\": \"https://cdn.example.com/premium-chat-icon.svg\",\n  \"buttonText\": \"Premium Support\",\n  \"buttonSize\": 70,\n  \"enableAnimations\": true,\n  \"openAnimation\": \"slideUp\",\n  \"closeAnimation\": \"slideDown\",\n  \"allowedDomains\": [\"techcorp.com\", \"*.techcorp.com\", \"app.techcorp.io\"],\n  \"customMetadata\": \"{\\\"segment\\\": \\\"premium\\\", \\\"analytics_id\\\": \\\"GTM-PREMIUM123\\\", \\\"intercom_workspace\\\": \\\"abc123\\\"}\",\n  \"showPoweredBy\": false,\n  \"isActive\": true\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/v1/widget-branding/group/:groupId",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "widget-branding", "group", ":groupId"],
+          "variable": [
+            {
+              "key": "groupId",
+              "value": "{{group_id}}",
+              "description": "Group ID"
+            }
+          ]
+        },
+        "description": "Advanced example with full customization including dark theme, custom CSS, extended business hours, custom pre-chat form fields, and premium branding."
+      },
+      "response": []
+    },
+    {
+      "name": "Complete Workflow Example",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "description": "JWT token from login"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"brandTitle\": \"Help Center\",\n  \"companyName\": \"Example Corp\",\n  \"logoUrl\": \"{{uploaded_logo_url}}\",\n  \"buttonIconUrl\": \"{{uploaded_icon_url}}\",\n  \"primaryColor\": \"#0084FF\",\n  \"welcomeMessage\": \"Welcome! How can we help you?\",\n  \"position\": \"bottom_right\",\n  \"theme\": \"light\",\n  \"isActive\": true\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/v1/widget-branding/group/:groupId",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "widget-branding", "group", ":groupId"],
+          "variable": [
+            {
+              "key": "groupId",
+              "value": "{{group_id}}",
+              "description": "Group ID"
+            }
+          ]
+        },
+        "description": "Complete workflow example:\n1. First upload logo using 'Upload Logo' endpoint\n2. Upload icon using 'Upload Icon' endpoint  \n3. Copy the fileUrl from responses\n4. Use this endpoint with the uploaded URLs\n\nUse {{uploaded_logo_url}} and {{uploaded_icon_url}} variables after uploading."
+      },
+      "response": []
+    }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "group_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "widget_branding_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "uploaded_logo_url",
+      "value": "",
+      "type": "string",
+      "description": "URL returned from logo upload endpoint"
+    },
+    {
+      "key": "uploaded_icon_url",
+      "value": "",
+      "type": "string",
+      "description": "URL returned from icon upload endpoint"
+    }
+  ]
+}

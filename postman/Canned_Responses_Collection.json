@@ -1,0 +1,495 @@
+{
+  "info": {
+    "name": "Canned Responses API",
+    "description": "Complete Canned Responses API with Shared/Private visibility and Multiple Messages support",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "12345678"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://livechatlog-dashboard-api-155761421960.us-central1.run.app",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "agentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "responseId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Create Shared Canned Response",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "    const response = pm.response.json();",
+              "    pm.environment.set('responseId', response.id);",
+              "    pm.collectionVariables.set('responseId', response.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"tag\": \"#greet\",\n  \"title\": \"Welcome Message\",\n  \"message\": \"Hello! Welcome to our support chat. How can I help you today?\",\n  \"category\": \"General\",\n  \"visibility\": \"shared\",\n  \"isActive\": true,\n  \"createdBy\": \"{{agentId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/canned-responses",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "canned-responses"]
+        },
+        "description": "Creates a new shared canned response visible to all agents. Supports multiple message variations."
+      },
+      "response": []
+    },
+    {
+      "name": "Create Private Canned Response",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"tag\": \"#mynote\",\n  \"title\": \"My Personal Quick Response\",\n  \"message\": \"This is my personal quick response that only I can see\",\n  \"category\": \"Personal\",\n  \"visibility\": \"private\",\n  \"isActive\": true,\n  \"createdBy\": \"{{agentId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/canned-responses",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "canned-responses"]
+        },
+        "description": "Creates a private canned response visible only to the creator agent."
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Canned Responses (Agent's View)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/canned-responses?agentId={{agentId}}&page=1&limit=50",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "canned-responses"],
+          "query": [
+            {
+              "key": "agentId",
+              "value": "{{agentId}}",
+              "description": "Returns shared responses + agent's private responses"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "50"
+            },
+            {
+              "key": "search",
+              "value": "",
+              "disabled": true,
+              "description": "Search by tag or title"
+            },
+            {
+              "key": "category",
+              "value": "",
+              "disabled": true,
+              "description": "Filter by category"
+            },
+            {
+              "key": "isActive",
+              "value": "true",
+              "disabled": true,
+              "description": "Filter by active status"
+            },
+            {
+              "key": "visibility",
+              "value": "",
+              "disabled": true,
+              "description": "Filter by visibility (shared/private)"
+            }
+          ]
+        },
+        "description": "Gets all canned responses accessible to the agent (all shared + agent's own private responses)."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Shared Responses Only",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/canned-responses?visibility=shared&page=1&limit=50",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "canned-responses"],
+          "query": [
+            {
+              "key": "visibility",
+              "value": "shared"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "50"
+            }
+          ]
+        },
+        "description": "Gets only shared canned responses visible to all agents."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Private Responses Only",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/canned-responses?visibility=private&agentId={{agentId}}&page=1&limit=50",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "canned-responses"],
+          "query": [
+            {
+              "key": "visibility",
+              "value": "private"
+            },
+            {
+              "key": "agentId",
+              "value": "{{agentId}}"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "50"
+            }
+          ]
+        },
+        "description": "Gets only private canned responses created by the specified agent."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Canned Responses",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/canned-responses?search=hello&category=General&isActive=true&agentId={{agentId}}&page=1&limit=50",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "canned-responses"],
+          "query": [
+            {
+              "key": "search",
+              "value": "hello",
+              "description": "Search by tag or title"
+            },
+            {
+              "key": "category",
+              "value": "General"
+            },
+            {
+              "key": "isActive",
+              "value": "true"
+            },
+            {
+              "key": "agentId",
+              "value": "{{agentId}}"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "50"
+            }
+          ]
+        },
+        "description": "Search canned responses with multiple filters: search term, category, active status, and agent access."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Canned Response by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/canned-responses/{{responseId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "canned-responses", "{{responseId}}"]
+        },
+        "description": "Gets a specific canned response by its UUID."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Canned Response by Tag (#greet)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/canned-responses/by-tag/%23greet",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "canned-responses", "by-tag", "%23greet"]
+        },
+        "description": "Gets a canned response by its tag. Note: # is URL-encoded as %23"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Canned Response by Tag (/hello)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/canned-responses/by-tag/%2Fhello",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "canned-responses", "by-tag", "%2Fhello"]
+        },
+        "description": "Gets a canned response by its tag. Note: / is URL-encoded as %2F"
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Categories",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/canned-responses/categories",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "canned-responses", "categories"]
+        },
+        "description": "Gets a list of all unique categories used in canned responses."
+      },
+      "response": []
+    },
+    {
+      "name": "Update Canned Response",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"tag\": \"#greet\",\n  \"title\": \"Updated Welcome Message\",\n  \"message\": \"Hello! This is an updated welcome message.\",\n  \"category\": \"General\",\n  \"visibility\": \"shared\",\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/canned-responses/{{responseId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "canned-responses", "{{responseId}}"]
+        },
+        "description": "Updates an existing canned response. All fields are optional."
+      },
+      "response": []
+    },
+    {
+      "name": "Update - Change to Private",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"visibility\": \"private\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/canned-responses/{{responseId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "canned-responses", "{{responseId}}"]
+        },
+        "description": "Changes a shared response to private (only visible to creator)."
+      },
+      "response": []
+    },
+    {
+      "name": "Update - Deactivate Response",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isActive\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/canned-responses/{{responseId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "canned-responses", "{{responseId}}"]
+        },
+        "description": "Deactivates a canned response without deleting it."
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Canned Response (Soft Delete)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/canned-responses/{{responseId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "canned-responses", "{{responseId}}"]
+        },
+        "description": "Soft deletes a canned response (marks as deleted but keeps in database)."
+      },
+      "response": []
+    }
+  ]
+}

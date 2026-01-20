@@ -1,0 +1,362 @@
+{
+  "info": {
+    "name": "LiveChatLog API - Updated Collection",
+    "description": "Complete API collection with Canned Responses (Shared/Private + Multiple Messages) and Conversation with Threads",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://livechatlog-dashboard-api-155761421960.us-central1.run.app",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "YOUR_JWT_TOKEN",
+      "type": "string"
+    },
+    {
+      "key": "agentId",
+      "value": "YOUR_AGENT_UUID",
+      "type": "string"
+    },
+    {
+      "key": "conversationId",
+      "value": "YOUR_CONVERSATION_UUID",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Canned Responses",
+      "item": [
+        {
+          "name": "Create Canned Response (Shared)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/canned-responses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tag\": \"#greet\",\n  \"title\": \"Welcome Message\",\n  \"message\": \"Hello! Welcome to our support chat. How can I help you today?\",\n  \"messages\": [\n    \"Hello! Welcome to our support chat. How can I help you today?\",\n    \"Hi there! Thanks for reaching out. What can I assist you with?\",\n    \"Welcome! I'm here to help. What brings you here today?\"\n  ],\n  \"category\": \"General\",\n  \"visibility\": \"shared\",\n  \"isActive\": true,\n  \"createdBy\": \"{{agentId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create Canned Response (Private)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/canned-responses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tag\": \"#mynote\",\n  \"title\": \"My Personal Note\",\n  \"message\": \"This is my personal quick response\",\n  \"messages\": [\n    \"This is my personal quick response\",\n    \"Alternative personal message\"\n  ],\n  \"category\": \"Personal\",\n  \"visibility\": \"private\",\n  \"isActive\": true,\n  \"createdBy\": \"{{agentId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Canned Responses (Agent's View)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/canned-responses?agentId={{agentId}}&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "canned-responses"],
+              "query": [
+                {
+                  "key": "agentId",
+                  "value": "{{agentId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Shared Responses Only",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/canned-responses?visibility=shared&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "canned-responses"],
+              "query": [
+                {
+                  "key": "visibility",
+                  "value": "shared"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Private Responses Only",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/canned-responses?visibility=private&agentId={{agentId}}&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "canned-responses"],
+              "query": [
+                {
+                  "key": "visibility",
+                  "value": "private"
+                },
+                {
+                  "key": "agentId",
+                  "value": "{{agentId}}"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Canned Responses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/canned-responses?search=hello&category=General&isActive=true&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "canned-responses"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "hello"
+                },
+                {
+                  "key": "category",
+                  "value": "General"
+                },
+                {
+                  "key": "isActive",
+                  "value": "true"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Canned Response by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/canned-responses/:id",
+            "variable": [
+              {
+                "key": "id",
+                "value": "RESPONSE_UUID"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Get Canned Response by Tag",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/canned-responses/by-tag/:tag",
+            "variable": [
+              {
+                "key": "tag",
+                "value": "#greet"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Get Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/canned-responses/categories"
+          }
+        },
+        {
+          "name": "Update Canned Response",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/canned-responses/:id",
+            "variable": [
+              {
+                "key": "id",
+                "value": "RESPONSE_UUID"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tag\": \"#greet\",\n  \"title\": \"Updated Welcome Message\",\n  \"message\": \"Hello! Updated welcome message.\",\n  \"messages\": [\n    \"Hello! Updated welcome message.\",\n    \"Hi! This is updated.\",\n    \"Welcome! Updated version.\"\n  ],\n  \"category\": \"General\",\n  \"visibility\": \"shared\",\n  \"isActive\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Canned Response",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/canned-responses/:id",
+            "variable": [
+              {
+                "key": "id",
+                "value": "RESPONSE_UUID"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Conversations",
+      "item": [
+        {
+          "name": "Get Conversation with All Threads & Events",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/conversations/{{conversationId}}",
+            "description": "Returns complete conversation with all threads and all events/messages"
+          }
+        },
+        {
+          "name": "Get Thread Events",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/threads/:threadId/events",
+            "variable": [
+              {
+                "key": "threadId",
+                "value": "THREAD_UUID"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Get Agent's Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/v1/agents/{{agentId}}/conversations"
+          }
+        }
+      ]
+    }
+  ]
+}

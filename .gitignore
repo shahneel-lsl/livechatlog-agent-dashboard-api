@@ -1,0 +1,90 @@
+# Dependencies
+node_modules/
+dist/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+*.lcov
+
+# Production
+build/
+
+# Misc
+.DS_Store
+*.pem
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# Temp files
+temp/*
+!temp/.gitkeep
+
+# Logs
+logs
+*.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Cloud SQL Proxy
+cloud_sql_proxy.exe
+cloud_sql_proxy
+
+# Docker
+.dockerignore
+
+# Package manager lock files (optional - uncomment if you want to ignore them)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# NestJS specific
+.nest/
+
+# Firebase
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Postman generated files
+*.postman_collection.json.backup
