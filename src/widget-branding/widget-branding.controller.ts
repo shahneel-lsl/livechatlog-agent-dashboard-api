@@ -41,7 +41,6 @@ export class WidgetBrandingController {
   }
 
   @Get('group/:groupId')
-  @UseGuards(JwtAuthGuard)
   findByGroupId(@Param('groupId') groupId: string) {
     return this.widgetBrandingService.findByGroupId(groupId);
   }
