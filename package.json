@@ -20,7 +20,6 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "typeorm-ts-node-commonjs",
     "seed": "ts-node -r tsconfig-paths/register scripts/seed-database.ts",
-    "seed:live": "powershell -ExecutionPolicy Bypass -File ./seed-job.ps1",
     "deploy": "powershell -ExecutionPolicy Bypass -File ./deploy.ps1"
   },
   "dependencies": {

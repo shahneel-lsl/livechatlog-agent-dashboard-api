@@ -7,7 +7,7 @@ import { AgentStatusService } from './agent-status.service';
 import { SessionController } from './session.controller';
 import { SessionService } from './session.service';
 import { SchedulerController } from './scheduler.controller';
-import { AgentSchedulerService } from './agent-scheduler.service';
+// import { AgentSchedulerService } from './agent-scheduler.service'; // DISABLED: Auto-away cron job commented out
 import { Agent } from '../database/mysql/agent.entity';
 import { AgentSession } from '../database/mysql/agent-session.entity';
 import { AgentSchedule } from '../database/mysql/agent-schedule.entity';
@@ -30,13 +30,13 @@ import { AuthModule } from '../auth/auth.module';
     AgentsController,
     AgentStatusController,
     SessionController,
-    SchedulerController,
+    // SchedulerController, // DISABLED: Auto-away cron job commented out
   ],
   providers: [
     AgentsService,
     AgentStatusService,
     SessionService,
-    AgentSchedulerService,
+    // AgentSchedulerService, // DISABLED: Auto-away cron job commented out
   ],
   exports: [AgentsService, AgentStatusService, SessionService],
 })
