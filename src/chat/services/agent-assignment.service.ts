@@ -529,12 +529,6 @@ export class AgentAssignmentService {
         status: conversation.status,
         assignedAgentId: agent.id,
         assignedAgentName: agent.name,
-        assignedAgent: {
-          id: agent.id,
-          name: agent.name,
-          email: agent.email,
-          avatar: agent.avatar,
-        },
         assignedAt: new Date().toISOString(),
         activeThreadId: conversation.activeThreadId,
       });
