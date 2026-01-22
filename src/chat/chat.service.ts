@@ -302,6 +302,39 @@ export class ChatService {
 
       await queryRunner.commitTransaction();
 
+      // 7. Sync to Firebase for real-time updates
+      try {
+        await this.firebaseService.updateConversation(conversationId, {
+          assignedAgentId: agent.id,
+          assignedAgent: {
+            id: agent.id,
+            name: agent.name,
+            email: agent.email,
+            avatar: agent.avatar,
+          },
+          activeThreadId: newThread.id,
+          status: 'active',
+          updatedAt: new Date().toISOString(),
+        });
+
+        // Add system event to Firebase
+        await this.firebaseService.addSystemEvent(conversationId, {
+          id: uuidv4(),
+          type: 'agent_assigned',
+          message: `Agent ${agent.name} joined the conversation`,
+          metadata: {
+            agentId: agent.id,
+            agentName: agent.name,
+          },
+          createdAt: new Date().toISOString(),
+        });
+
+        this.logger.log(`Conversation ${conversationId} assignment synced to Firebase`);
+      } catch (error) {
+        this.logger.error(`Failed to sync assignment to Firebase: ${error.message}`);
+        // Don't throw error - assignment was successful in DB
+      }
+
       const updatedConversation = await this.conversationRepository.findOne({
         where: { id: conversationId },
         relations: ['visitor', 'assignedAgent', 'group', 'threads'],
