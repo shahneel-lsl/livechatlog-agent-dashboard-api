@@ -33,6 +33,7 @@ import { GetConversationsDto } from './dto/get-conversations.dto';
 import { SendMediaMessageDto } from './dto/send-media-message.dto';
 import { EventAuthorType } from '../database/mysql/event.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { Throttle } from '@nestjs/throttler';
 
 @Controller('v1')
@@ -170,8 +171,10 @@ export class ChatController {
   /**
    * Close a conversation (LiveChat Inc style - closes active thread)
    * Public endpoint - can be called by agents (authenticated) or visitors
+   * OptionalJwtAuthGuard: Parses JWT if present but doesn't require it
    */
   @Post('conversations/:conversationId/close')
+  @UseGuards(OptionalJwtAuthGuard)
   closeConversation(
     @Param('conversationId') conversationId: string,
     @Body() closeDto: CloseConversationDto,
@@ -180,7 +183,7 @@ export class ChatController {
     return this.conversationManagementService.closeConversation(
       conversationId,
       closeDto,
-      req.user, // Will be undefined for visitors
+      req.user, // Will be populated if JWT is valid, undefined for visitors
     );
   }
 
