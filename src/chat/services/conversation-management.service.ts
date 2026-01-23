@@ -113,14 +113,15 @@ export class ConversationManagementService {
         await queryRunner.manager.save(activeThread);
 
         // 3. Add system event to thread for closure
+        const closedByName = agent ? agent.name : (conversation.visitor.name || 'Visitor');
         closeEvent = this.eventRepository.create({
           id: uuidv4(),
           threadId: activeThread.id,
           type: EventType.SYSTEM,
           authorType: EventAuthorType.SYSTEM,
           content: agent 
-            ? `Chat closed by ${agent.name}. Reason: ${closeDto.reason}${closeDto.notes ? `. Notes: ${closeDto.notes}` : ''}`
-            : `Chat closed by visitor. Reason: ${closeDto.reason}${closeDto.notes ? `. Notes: ${closeDto.notes}` : ''}`,
+            ? `Chat has been closed by agent ${agent.name}`
+            : `Chat has been closed by visitor ${closedByName}`,
           agentId: agent?.id,
         });
         await queryRunner.manager.save(closeEvent);

@@ -151,7 +151,7 @@ export class ChatService {
     // Find conversation with active thread
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
-      relations: ['threads'],
+      relations: ['threads', 'visitor'],
     });
 
     if (!conversation) {
@@ -159,14 +159,70 @@ export class ChatService {
     }
 
     // Get active thread from conversation
-    const activeThread = await this.threadRepository.findOne({
+    let activeThread = await this.threadRepository.findOne({
       where: { 
         conversationId: conversation.id, 
         status: ThreadStatus.ACTIVE 
       },
     });
 
-    if (!activeThread) {
+    // If no active thread and visitor is sending a message, auto-reopen the conversation
+    if (!activeThread && createEventDto.authorType === EventAuthorType.VISITOR) {
+      const queryRunner = this.dataSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      try {
+        // Create new thread
+        activeThread = this.threadRepository.create({
+          id: uuidv4(),
+          conversation: conversation,
+          conversationId: conversation.id,
+          status: ThreadStatus.ACTIVE,
+        });
+        await queryRunner.manager.save(activeThread);
+
+        // Add system event for auto-reopening
+        const reopenEvent = this.eventRepository.create({
+          id: uuidv4(),
+          threadId: activeThread.id,
+          type: EventType.SYSTEM,
+          authorType: EventAuthorType.SYSTEM,
+          content: `Conversation automatically reopened by visitor ${conversation.visitor.name || 'message'}`,
+        });
+        await queryRunner.manager.save(reopenEvent);
+
+        // Update conversation status to ACTIVE
+        conversation.status = ConversationStatus.ACTIVE;
+        conversation.activeThreadId = activeThread.id;
+        await queryRunner.manager.save(conversation);
+
+        await queryRunner.commitTransaction();
+
+        // Sync to Firebase
+        await this.firebaseService.updateConversation(conversationId, {
+          status: 'active',
+          activeThreadId: activeThread.id,
+          reopenedBy: 'visitor',
+          reopenedAt: new Date().toISOString(),
+        });
+
+        // Sync system event to Firebase
+        await this.firebaseService.addSystemEvent(conversationId, {
+          id: reopenEvent.id,
+          type: 'conversation_reopened',
+          message: reopenEvent.content,
+          createdAt: reopenEvent.createdAt.toISOString(),
+        });
+
+        this.logger.log(`Conversation ${conversationId} automatically reopened by visitor message`);
+      } catch (error) {
+        await queryRunner.rollbackTransaction();
+        throw error;
+      } finally {
+        await queryRunner.release();
+      }
+    } else if (!activeThread) {
       throw new NotFoundException(
         'No active thread found for this conversation. The conversation may be closed.',
       );
