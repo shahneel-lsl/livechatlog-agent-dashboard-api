@@ -15,4 +15,8 @@ export class CloseConversationDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @IsOptional()
+  @IsString()
+  sessionToken?: string; // For visitor-initiated closures
 }

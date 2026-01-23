@@ -322,7 +322,7 @@ export class FirebaseService implements OnModuleInit {
     conversationId: string,
     event: {
       id: string;
-      type: 'agent_assigned' | 'agent_joined' | 'conversation_closed' | 'thread_closed';
+      type: 'agent_assigned' | 'agent_joined' | 'conversation_closed' | 'thread_closed' | 'chat_closed';
       message: string;
       metadata?: Record<string, any>;
       createdAt: string;

@@ -64,7 +64,7 @@ export class ConversationManagementService {
   async closeConversation(
     conversationId: string,
     closeDto: CloseConversationDto,
-    agent: Agent,
+    agent?: Agent,
   ): Promise<{ success: boolean; message: string; conversation: Conversation }> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -85,6 +85,16 @@ export class ConversationManagementService {
         throw new BadRequestException('Conversation is already closed');
       }
 
+      // Validate visitor ownership for visitor-initiated closures
+      if (!agent) {
+        if (!closeDto.sessionToken) {
+          throw new BadRequestException('Session token required for visitor-initiated conversation closure');
+        }
+        if (conversation.visitor.sessionToken !== closeDto.sessionToken) {
+          throw new BadRequestException('Invalid session token - you can only close your own conversations');
+        }
+      }
+
       // 2. Close the active thread
       const activeThread = await queryRunner.manager.findOne(Thread, {
         where: { 
@@ -93,21 +103,25 @@ export class ConversationManagementService {
         },
       });
 
+      let closeEvent: Event | null = null;
+
       if (activeThread) {
         activeThread.status = ThreadStatus.CLOSED;
-        activeThread.closedBy = 'agent';
+        activeThread.closedBy = agent ? 'agent' : 'visitor';
         activeThread.closedReason = this.mapCloseReasonToThreadReason(closeDto.reason);
         activeThread.closedAt = new Date();
         await queryRunner.manager.save(activeThread);
 
         // 3. Add system event to thread for closure
-        const closeEvent = this.eventRepository.create({
+        closeEvent = this.eventRepository.create({
           id: uuidv4(),
           threadId: activeThread.id,
           type: EventType.SYSTEM,
           authorType: EventAuthorType.SYSTEM,
-          content: `Chat closed by ${agent.name}. Reason: ${closeDto.reason}${closeDto.notes ? `. Notes: ${closeDto.notes}` : ''}`,
-          agentId: agent.id,
+          content: agent 
+            ? `Chat closed by ${agent.name}. Reason: ${closeDto.reason}${closeDto.notes ? `. Notes: ${closeDto.notes}` : ''}`
+            : `Chat closed by visitor. Reason: ${closeDto.reason}${closeDto.notes ? `. Notes: ${closeDto.notes}` : ''}`,
+          agentId: agent?.id,
         });
         await queryRunner.manager.save(closeEvent);
       }
@@ -124,12 +138,27 @@ export class ConversationManagementService {
 
       // 5. Sync to Firebase
       await this.syncConversationStatusToFirebase(conversationId, 'closed', {
-        closedBy: agent.name,
+        closedBy: agent?.name || 'visitor',
         closedAt: new Date().toISOString(),
         reason: closeDto.reason,
       });
 
-      this.logger.log(`Conversation ${conversationId} closed by agent ${agent.name}`);
+      // 6. Sync close system event to Firebase (if there was an active thread)
+      if (activeThread && closeEvent) {
+        await this.firebaseService.addSystemEvent(conversationId, {
+          id: closeEvent.id,
+          type: 'chat_closed',
+          message: closeEvent.content,
+          metadata: {
+            closedBy: agent?.name || 'visitor',
+            reason: closeDto.reason,
+            notes: closeDto.notes,
+          },
+          createdAt: closeEvent.createdAt.toISOString(),
+        });
+      }
+
+      this.logger.log(`Conversation ${conversationId} closed by ${agent ? `agent ${agent.name}` : 'visitor'}`);
 
       return {
         success: true,

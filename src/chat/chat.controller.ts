@@ -169,9 +169,9 @@ export class ChatController {
 
   /**
    * Close a conversation (LiveChat Inc style - closes active thread)
+   * Public endpoint - can be called by agents (authenticated) or visitors
    */
   @Post('conversations/:conversationId/close')
-  @UseGuards(JwtAuthGuard)
   closeConversation(
     @Param('conversationId') conversationId: string,
     @Body() closeDto: CloseConversationDto,
@@ -180,7 +180,7 @@ export class ChatController {
     return this.conversationManagementService.closeConversation(
       conversationId,
       closeDto,
-      req.user,
+      req.user, // Will be undefined for visitors
     );
   }
 
