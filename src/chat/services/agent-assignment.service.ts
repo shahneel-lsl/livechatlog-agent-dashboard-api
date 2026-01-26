@@ -202,7 +202,7 @@ export class AgentAssignmentService {
       });
       await queryRunner.manager.save(assignmentEvent);
 
-      // 7. Update conversation
+      // 7. Update conversation to ACTIVE with assigned agent
       conversation.assignedAgentId = availableAgent.id;
       conversation.status = ConversationStatus.ACTIVE;
       conversation.activeThreadId = newThread.id;
@@ -210,7 +210,11 @@ export class AgentAssignmentService {
 
       await queryRunner.commitTransaction();
 
-      // 8. Sync to Firebase for real-time updates
+      this.logger.log(
+        `✅ Conversation ${conversationId} status updated to ACTIVE in database`,
+      );
+
+      // 8. Sync to Firebase for real-time updates (including ACTIVE status)
       await this.syncToFirebase(conversation, availableAgent, assignmentEvent);
 
       // 9. Log successful assignment

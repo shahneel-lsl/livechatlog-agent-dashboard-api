@@ -148,6 +148,8 @@ export class ChatService {
     createEventDto: CreateEventDto,
     agent?: Agent,
   ): Promise<Event> {
+    this.logger.log(`Creating event for conversation ${conversationId}, authorType: ${createEventDto.authorType}, type: ${createEventDto.type}`);
+    
     // Find conversation with active thread
     const conversation = await this.conversationRepository.findOne({
       where: { id: conversationId },
@@ -158,6 +160,8 @@ export class ChatService {
       throw new NotFoundException('Conversation not found');
     }
 
+    this.logger.log(`Conversation ${conversationId} status: ${conversation.status}, has ${conversation.threads?.length || 0} threads`);
+
     // Get active thread from conversation
     let activeThread = await this.threadRepository.findOne({
       where: { 
@@ -166,8 +170,48 @@ export class ChatService {
       },
     });
 
+    // Check if conversation is closed/resolved and needs reopening
+    const conversationIsClosed = 
+      conversation.status === ConversationStatus.CLOSED || 
+      conversation.status === ConversationStatus.RESOLVED;
+
+    // FIX: If conversation is closed but has an active thread (inconsistent state), 
+    // reopen the conversation to match the thread status
+    if (activeThread && conversationIsClosed && createEventDto.authorType === EventAuthorType.VISITOR) {
+      this.logger.log(`🔄 Inconsistent state detected: Conversation ${conversationId} is CLOSED but has ACTIVE thread. Reopening conversation...`);
+      
+      conversation.status = ConversationStatus.PENDING;
+      await this.conversationRepository.save(conversation);
+      
+      // Sync to Firebase
+      await this.firebaseService.updateConversation(conversationId, {
+        status: 'pending',
+        reopenedBy: 'visitor',
+        reopenedAt: new Date().toISOString(),
+      });
+      
+      // Trigger agent assignment
+      setImmediate(async () => {
+        try {
+          this.logger.log(`🔄 Auto-assigning agent to reopened conversation ${conversationId}`);
+          const result = await this.agentAssignmentService.assignAgentToConversation(
+            conversationId,
+            conversation.groupId,
+          );
+          
+          if (result.success) {
+            this.logger.log(`✅ Agent ${result.assignedAgent?.name} assigned to conversation ${conversationId}`);
+          } else {
+            this.logger.warn(`⚠️ No agent available for conversation ${conversationId}: ${result.message}`);
+          }
+        } catch (error) {
+          this.logger.error(`❌ Error assigning agent:`, error);
+        }
+      });
+    }
+
     // If no active thread and visitor is sending a message, auto-reopen the conversation
-    if (!activeThread && createEventDto.authorType === EventAuthorType.VISITOR) {
+    if (!activeThread && createEventDto.authorType === EventAuthorType.VISITOR && conversationIsClosed) {
       const queryRunner = this.dataSource.createQueryRunner();
       await queryRunner.connect();
       await queryRunner.startTransaction();
@@ -192,8 +236,9 @@ export class ChatService {
         });
         await queryRunner.manager.save(reopenEvent);
 
-        // Update conversation status to ACTIVE
-        conversation.status = ConversationStatus.ACTIVE;
+        // Update conversation status to PENDING for agent assignment
+        // Agent assignment service will change it to ACTIVE when agent is assigned
+        conversation.status = ConversationStatus.PENDING;
         conversation.activeThreadId = activeThread.id;
         await queryRunner.manager.save(conversation);
 
@@ -201,7 +246,7 @@ export class ChatService {
 
         // Sync to Firebase
         await this.firebaseService.updateConversation(conversationId, {
-          status: 'active',
+          status: 'pending', // Set to pending until agent is assigned
           activeThreadId: activeThread.id,
           reopenedBy: 'visitor',
           reopenedAt: new Date().toISOString(),
@@ -215,14 +260,79 @@ export class ChatService {
           createdAt: reopenEvent.createdAt.toISOString(),
         });
 
-        this.logger.log(`Conversation ${conversationId} automatically reopened by visitor message`);
+        this.logger.log(`Conversation ${conversationId} automatically reopened by visitor message. Triggering agent assignment...`);
+
+        // Trigger agent assignment for reopened conversation
+        // This runs asynchronously after the transaction to avoid blocking the visitor's message
+        // Using Promise to ensure it executes (setImmediate may not run in some environments)
+        (async () => {
+          try {
+            // Small delay to ensure transaction is committed
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            this.logger.log(`🔄 Starting agent assignment for reopened conversation ${conversationId}`);
+            const result = await this.agentAssignmentService.assignAgentToConversation(
+              conversationId,
+              conversation.groupId,
+            );
+
+            if (result.success) {
+              this.logger.log(
+                `✅ SUCCESS: Agent ${result.assignedAgent?.name} (${result.assignedAgent?.id}) assigned to conversation ${conversationId}. Status should now be ACTIVE.`,
+              );
+              // Agent assignment service already synced status to ACTIVE in Firebase
+              
+              // Double-check the status was updated
+              const updatedConversation = await this.conversationRepository.findOne({
+                where: { id: conversationId },
+                select: ['id', 'status', 'assignedAgentId'],
+              });
+              this.logger.log(
+                `📊 Verification: Conversation ${conversationId} status is now: ${updatedConversation?.status}, assignedAgent: ${updatedConversation?.assignedAgentId}`,
+              );
+            } else {
+              this.logger.warn(
+                `⚠️ FAILED: No agent available for conversation ${conversationId}. Reason: ${result.message}`,
+              );
+              // Keep conversation in pending state in Firebase
+              await this.firebaseService.updateConversation(conversationId, {
+                status: 'pending',
+                assignmentFailed: true,
+                assignmentFailureReason: result.message,
+                lastAssignmentAttempt: new Date().toISOString(),
+              });
+            }
+          } catch (error) {
+            this.logger.error(
+              `❌ EXCEPTION during agent assignment for conversation ${conversationId}:`,
+              error.stack || error,
+            );
+            // Mark assignment error in Firebase
+            try {
+              await this.firebaseService.updateConversation(conversationId, {
+                status: 'pending',
+                assignmentError: true,
+                assignmentErrorMessage: error.message,
+                lastAssignmentAttempt: new Date().toISOString(),
+              });
+            } catch (firebaseError) {
+              this.logger.error('Failed to sync assignment error to Firebase:', firebaseError);
+            }
+          }
+        })().catch(err => {
+          this.logger.error(`❌ Unhandled error in agent assignment promise for ${conversationId}:`, err);
+        });
       } catch (error) {
         await queryRunner.rollbackTransaction();
+        this.logger.error(`Failed to reopen conversation ${conversationId}:`, error);
         throw error;
       } finally {
         await queryRunner.release();
       }
     } else if (!activeThread) {
+      this.logger.warn(
+        `No active thread for conversation ${conversationId}. Status: ${conversation.status}, AuthorType: ${createEventDto.authorType}`,
+      );
       throw new NotFoundException(
         'No active thread found for this conversation. The conversation may be closed.',
       );
