@@ -1,0 +1,447 @@
+{
+	"info": {
+		"_postman_id": "prechat-form-api-collection",
+		"name": "PreChat Form API",
+		"description": "Complete API collection for LiveChat Pre-Chat Form Module",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "YOUR_JWT_TOKEN_HERE",
+			"type": "string"
+		},
+		{
+			"key": "groupId",
+			"value": "YOUR_GROUP_UUID_HERE",
+			"type": "string"
+		},
+		{
+			"key": "formId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "conversationId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Agent Dashboard (Protected)",
+			"item": [
+				{
+					"name": "Create Pre-Chat Form",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('formId', response.id);",
+									"    console.log('Form ID saved:', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"groupId\": \"{{groupId}}\",\n  \"title\": \"Customer Support Form\",\n  \"description\": \"Please provide your details so we can assist you better\",\n  \"isRequired\": true,\n  \"isActive\": true,\n  \"fields\": [\n    {\n      \"label\": \"Full Name\",\n      \"type\": \"text\",\n      \"isRequired\": true,\n      \"placeholder\": \"Enter your full name\",\n      \"order\": 0\n    },\n    {\n      \"label\": \"Email Address\",\n      \"type\": \"email\",\n      \"isRequired\": true,\n      \"placeholder\": \"your.email@example.com\",\n      \"order\": 1\n    },\n    {\n      \"label\": \"Phone Number\",\n      \"type\": \"phone\",\n      \"isRequired\": false,\n      \"placeholder\": \"+1 (555) 123-4567\",\n      \"order\": 2\n    },\n    {\n      \"label\": \"Department\",\n      \"type\": \"select\",\n      \"isRequired\": false,\n      \"options\": [\"Sales\", \"Technical Support\", \"Billing\", \"General Inquiry\"],\n      \"order\": 3\n    },\n    {\n      \"label\": \"How can we help you?\",\n      \"type\": \"textarea\",\n      \"isRequired\": true,\n      \"placeholder\": \"Please describe your issue...\",\n      \"order\": 4\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/prechat/admin/forms",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"prechat",
+								"admin",
+								"forms"
+							]
+						},
+						"description": "Create a new pre-chat form for a group"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Forms",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/prechat/admin/forms",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"prechat",
+								"admin",
+								"forms"
+							]
+						},
+						"description": "Retrieve all pre-chat forms"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Form by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/prechat/admin/forms/{{formId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"prechat",
+								"admin",
+								"forms",
+								"{{formId}}"
+							]
+						},
+						"description": "Get a specific form by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Form",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated Support Form\",\n  \"description\": \"Updated description\",\n  \"isActive\": true,\n  \"fields\": [\n    {\n      \"label\": \"Name\",\n      \"type\": \"text\",\n      \"isRequired\": true,\n      \"order\": 0\n    },\n    {\n      \"label\": \"Email\",\n      \"type\": \"email\",\n      \"isRequired\": true,\n      \"order\": 1\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/prechat/admin/forms/{{formId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"prechat",
+								"admin",
+								"forms",
+								"{{formId}}"
+							]
+						},
+						"description": "Update an existing form"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Form",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/prechat/admin/forms/{{formId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"prechat",
+								"admin",
+								"forms",
+								"{{formId}}"
+							]
+						},
+						"description": "Soft delete a form"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Conversation Pre-Chat Data",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/prechat/admin/conversations/{{conversationId}}/prechat",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"prechat",
+								"admin",
+								"conversations",
+								"{{conversationId}}",
+								"prechat"
+							]
+						},
+						"description": "View pre-chat submission for a conversation (agent view)"
+					},
+					"response": []
+				}
+			],
+			"description": "Protected endpoints requiring JWT authentication"
+		},
+		{
+			"name": "Widget (Public)",
+			"item": [
+				{
+					"name": "Get Form by Group",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('formId', response.id);",
+									"    console.log('Form ID saved:', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/prechat/widget/groups/{{groupId}}/form",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"prechat",
+								"widget",
+								"groups",
+								"{{groupId}}",
+								"form"
+							]
+						},
+						"description": "Get active pre-chat form for a group (public endpoint)"
+					},
+					"response": []
+				},
+				{
+					"name": "Submit Pre-Chat Form",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200 || pm.response.code === 201) {",
+									"    const response = pm.response.json();",
+									"    pm.collectionVariables.set('conversationId', response.conversationId);",
+									"    console.log('Conversation ID saved:', response.conversationId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"formId\": \"{{formId}}\",\n  \"visitorId\": \"visitor-uuid-12345\",\n  \"answers\": [\n    {\n      \"fieldId\": \"REPLACE_WITH_FIELD_UUID_1\",\n      \"value\": \"John Doe\"\n    },\n    {\n      \"fieldId\": \"REPLACE_WITH_FIELD_UUID_2\",\n      \"value\": \"john.doe@example.com\"\n    },\n    {\n      \"fieldId\": \"REPLACE_WITH_FIELD_UUID_3\",\n      \"value\": \"+1 555 123 4567\"\n    },\n    {\n      \"fieldId\": \"REPLACE_WITH_FIELD_UUID_4\",\n      \"value\": \"Technical Support\"\n    },\n    {\n      \"fieldId\": \"REPLACE_WITH_FIELD_UUID_5\",\n      \"value\": \"I need help setting up my account and configuring the settings.\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/prechat/widget/submit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"prechat",
+								"widget",
+								"submit"
+							]
+						},
+						"description": "Submit pre-chat form (creates conversation, snapshot, and answers)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Conversation Pre-Chat (Visitor View)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/prechat/widget/conversations/{{conversationId}}/prechat",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"prechat",
+								"widget",
+								"conversations",
+								"{{conversationId}}",
+								"prechat"
+							]
+						},
+						"description": "View pre-chat submission (visitor/public view)"
+					},
+					"response": []
+				},
+				{
+					"name": "Check if Conversation Has Pre-Chat",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/prechat/widget/conversations/{{conversationId}}/has-prechat",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"prechat",
+								"widget",
+								"conversations",
+								"{{conversationId}}",
+								"has-prechat"
+							]
+						},
+						"description": "Check if a conversation has pre-chat data"
+					},
+					"response": []
+				}
+			],
+			"description": "Public endpoints (no authentication required)"
+		},
+		{
+			"name": "Test Scenarios",
+			"item": [
+				{
+					"name": "Missing Required Field (Should Fail)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"formId\": \"{{formId}}\",\n  \"visitorId\": \"visitor-uuid\",\n  \"answers\": [\n    {\n      \"fieldId\": \"field-uuid-1\",\n      \"value\": \"John Doe\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/prechat/widget/submit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"prechat",
+								"widget",
+								"submit"
+							]
+						},
+						"description": "Test validation - should return 400 for missing required fields"
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Form ID (Should Fail)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"formId\": \"invalid-form-id\",\n  \"visitorId\": \"visitor-uuid\",\n  \"answers\": []\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/prechat/widget/submit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"prechat",
+								"widget",
+								"submit"
+							]
+						},
+						"description": "Test validation - should return 404 for invalid form ID"
+					},
+					"response": []
+				}
+			],
+			"description": "Test validation and error scenarios"
+		}
+	]
+}

@@ -120,8 +120,8 @@ export class ConversationManagementService {
           type: EventType.SYSTEM,
           authorType: EventAuthorType.SYSTEM,
           content: agent 
-            ? `Chat has been closed by agent ${agent.name}`
-            : `Chat has been closed by visitor ${closedByName}`,
+            ? `Chat has been closed by agent`
+            : `Chat has been closed by visitor`,
           agentId: agent?.id,
         });
         await queryRunner.manager.save(closeEvent);
