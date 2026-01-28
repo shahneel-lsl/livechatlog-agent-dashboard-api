@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AgentsController } from './agents.controller';
 import { AgentsService } from './agents.service';
+import { AgentController } from './agent.controller';
+import { AgentService } from './agent.service';
 import { AgentStatusController } from './agent-status.controller';
 import { AgentStatusService } from './agent-status.service';
 import { SessionController } from './session.controller';
@@ -28,16 +30,18 @@ import { AuthModule } from '../auth/auth.module';
   ],
   controllers: [
     AgentsController,
+    AgentController,
     AgentStatusController,
     SessionController,
     // SchedulerController, // DISABLED: Auto-away cron job commented out
   ],
   providers: [
     AgentsService,
+    AgentService,
     AgentStatusService,
     SessionService,
     // AgentSchedulerService, // DISABLED: Auto-away cron job commented out
   ],
-  exports: [AgentsService, AgentStatusService, SessionService],
+  exports: [AgentsService, AgentService, AgentStatusService, SessionService],
 })
 export class AgentsModule {}

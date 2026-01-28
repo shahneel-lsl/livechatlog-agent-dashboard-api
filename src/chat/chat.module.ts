@@ -2,11 +2,13 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatController } from './chat.controller';
 import { SupervisorController } from './supervisor.controller';
+import { TrafficController } from './traffic.controller';
 import { ChatService } from './chat.service';
 import { AgentAssignmentService } from './services/agent-assignment.service';
 import { ConversationManagementService } from './services/conversation-management.service';
 import { ChatMediaService } from './services/chat-media.service';
 import { SupervisorService } from './services/supervisor.service';
+import { TrafficService } from './services/traffic.service';
 import { Visitor } from '../database/mysql/visitor.entity';
 import { Conversation } from '../database/mysql/conversation.entity';
 import { Thread } from '../database/mysql/thread.entity';
@@ -31,13 +33,14 @@ import { AuthModule } from '../auth/auth.module';
     ]),
     AuthModule,
   ],
-  controllers: [ChatController, SupervisorController],
+  controllers: [ChatController, SupervisorController, TrafficController],
   providers: [
     ChatService,
     AgentAssignmentService,
     ConversationManagementService,
     ChatMediaService,
     SupervisorService,
+    TrafficService,
   ],
   exports: [
     ChatService,
@@ -45,6 +48,7 @@ import { AuthModule } from '../auth/auth.module';
     ConversationManagementService,
     ChatMediaService,
     SupervisorService,
+    TrafficService,
   ],
 })
 export class ChatModule {}
