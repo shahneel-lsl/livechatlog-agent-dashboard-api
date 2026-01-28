@@ -18,7 +18,7 @@ import { LogsModule } from './logs/logs.module';
 import { CannedResponsesModule } from './canned-responses/canned-responses.module';
 import { WidgetBrandingModule } from './widget-branding/widget-branding.module';
 import { PrechatModule } from './prechat/prechat.module';
-// import { QueueModule } from './queue/queue.module'; // Commented out - requires Redis
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [
@@ -72,7 +72,7 @@ import { PrechatModule } from './prechat/prechat.module';
     CannedResponsesModule,
     WidgetBrandingModule,
     PrechatModule,
-    // QueueModule, // Commented out - requires Redis (BullMQ for automatic agent assignment)
+    QueueModule, // Queue scheduler for automatic agent assignment
   ],
   controllers: [AppController],
   providers: [

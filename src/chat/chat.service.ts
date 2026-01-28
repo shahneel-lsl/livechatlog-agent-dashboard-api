@@ -119,8 +119,8 @@ export class ChatService {
       await this.syncConversationToFirebase(conversation, visitor, group ?? undefined);
       await this.syncEventToFirebase(conversation.id, event);
 
-      // 8. Schedule agent assignment after 3 seconds
-      this.scheduleAgentAssignment(conversation.id, group?.id);
+      // 8. Conversation stays in PENDING - queue scheduler will assign agent
+      // No setTimeout needed - scheduler runs every 5 seconds and will pick this up
 
       // 9. Return session information
       return {
@@ -556,42 +556,6 @@ export class ChatService {
       relations: ['agent'],
       order: { createdAt: 'ASC' },
     });
-  }
-
-  /**
-   * Schedule agent assignment after 3 seconds
-   * This can be replaced with BullMQ queue later
-   */
-  private scheduleAgentAssignment(
-    conversationId: string,
-    groupId?: string,
-  ): void {
-    setTimeout(async () => {
-      try {
-        this.logger.log(
-          `🕐 Auto-assigning agent to conversation ${conversationId} after 3 seconds`,
-        );
-        const result = await this.agentAssignmentService.assignAgentToConversation(
-          conversationId,
-          groupId,
-        );
-
-        if (result.success) {
-          this.logger.log(
-            `✅ Agent ${result.assignedAgent?.name} assigned to conversation ${conversationId}`,
-          );
-        } else {
-          this.logger.warn(
-            `⚠️ Agent assignment failed for conversation ${conversationId}: ${result.message}`,
-          );
-        }
-      } catch (error) {
-        this.logger.error(
-          `❌ Error during auto-assignment for conversation ${conversationId}:`,
-          error,
-        );
-      }
-    }, 3000); // 3 seconds
   }
 
   /**

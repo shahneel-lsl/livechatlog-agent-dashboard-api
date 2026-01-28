@@ -23,8 +23,8 @@ export class SubmitPrechatFormDto {
   formId: string;
 
   @IsString()
-  @IsOptional()
-  visitorId?: string;
+  @IsNotEmpty()
+  conversationId: string;
 
   @IsArray()
   @ValidateNested({ each: true })

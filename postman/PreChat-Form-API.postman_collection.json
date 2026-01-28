@@ -308,7 +308,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"formId\": \"{{formId}}\",\n  \"visitorId\": \"visitor-uuid-12345\",\n  \"answers\": [\n    {\n      \"fieldId\": \"REPLACE_WITH_FIELD_UUID_1\",\n      \"value\": \"John Doe\"\n    },\n    {\n      \"fieldId\": \"REPLACE_WITH_FIELD_UUID_2\",\n      \"value\": \"john.doe@example.com\"\n    },\n    {\n      \"fieldId\": \"REPLACE_WITH_FIELD_UUID_3\",\n      \"value\": \"+1 555 123 4567\"\n    },\n    {\n      \"fieldId\": \"REPLACE_WITH_FIELD_UUID_4\",\n      \"value\": \"Technical Support\"\n    },\n    {\n      \"fieldId\": \"REPLACE_WITH_FIELD_UUID_5\",\n      \"value\": \"I need help setting up my account and configuring the settings.\"\n    }\n  ]\n}"
+							"raw": "{\n  \"formId\": \"{{formId}}\",\n  \"conversationId\": \"{{conversationId}}\",\n  \"answers\": [\n    {\n      \"fieldId\": \"REPLACE_WITH_FIELD_UUID_1\",\n      \"value\": \"John Doe\"\n    },\n    {\n      \"fieldId\": \"REPLACE_WITH_FIELD_UUID_2\",\n      \"value\": \"john.doe@example.com\"\n    },\n    {\n      \"fieldId\": \"REPLACE_WITH_FIELD_UUID_3\",\n      \"value\": \"+1 555 123 4567\"\n    },\n    {\n      \"fieldId\": \"REPLACE_WITH_FIELD_UUID_4\",\n      \"value\": \"Technical Support\"\n    },\n    {\n      \"fieldId\": \"REPLACE_WITH_FIELD_UUID_5\",\n      \"value\": \"I need help setting up my account and configuring the settings.\"\n    }\n  ]\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/prechat/widget/submit",
@@ -391,7 +391,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"formId\": \"{{formId}}\",\n  \"visitorId\": \"visitor-uuid\",\n  \"answers\": [\n    {\n      \"fieldId\": \"field-uuid-1\",\n      \"value\": \"John Doe\"\n    }\n  ]\n}"
+							"raw": "{\n  \"formId\": \"{{formId}}\",\n  \"conversationId\": \"{{conversationId}}\",\n  \"answers\": [\n    {\n      \"fieldId\": \"field-uuid-1\",\n      \"value\": \"John Doe\"\n    }\n  ]\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/prechat/widget/submit",
@@ -422,7 +422,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"formId\": \"invalid-form-id\",\n  \"visitorId\": \"visitor-uuid\",\n  \"answers\": []\n}"
+							"raw": "{\n  \"formId\": \"invalid-form-id\",\n  \"conversationId\": \"invalid-conversation-id\",\n  \"answers\": []\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/v1/prechat/widget/submit",

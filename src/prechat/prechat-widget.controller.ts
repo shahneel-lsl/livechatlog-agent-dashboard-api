@@ -20,7 +20,7 @@ export class PrechatWidgetController {
 
   @Get('groups/:groupId/form')
   async getFormByGroup(@Param('groupId') groupId: string) {
-    const form = await this.prechatService.findByGroupId(groupId);
+    const form = await this.prechatService.findByGroupId('cc54467c-c845-448f-8c7e-2e9adb87dabd');
 
     if (!form) {
       throw new NotFoundException(

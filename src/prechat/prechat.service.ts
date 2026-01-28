@@ -84,6 +84,7 @@ export class PrechatService {
   }
 
   async findByGroupId(groupId: string): Promise<PrechatForm | null> {
+  console.log("This was the group id :: ",groupId)
     return this.prechatFormRepository.findOne({
       where: { groupId, isActive: true },
       relations: ['fields'],
@@ -166,6 +167,28 @@ export class PrechatService {
       );
     }
 
+    // Find existing conversation
+    const conversation = await this.conversationRepository.findOne({
+      where: { id: submitDto.conversationId },
+    });
+
+    if (!conversation) {
+      throw new NotFoundException(
+        `Conversation with ID ${submitDto.conversationId} not found`,
+      );
+    }
+
+    // Check if conversation already has pre-chat submission
+    const existingSnapshot = await this.snapshotRepository.findOne({
+      where: { conversationId: submitDto.conversationId },
+    });
+
+    if (existingSnapshot) {
+      throw new ConflictException(
+        `Conversation ${submitDto.conversationId} already has a pre-chat submission`,
+      );
+    }
+
     // Validate required fields
     const requiredFieldIds = form.fields
       .filter((f) => f.isRequired)
@@ -182,16 +205,6 @@ export class PrechatService {
       );
     }
 
-    // Create conversation
-    const conversation = this.conversationRepository.create({
-      visitorId: submitDto.visitorId,
-      groupId: form.groupId,
-      status: ConversationStatus.PENDING,
-    });
-
-    const savedConversation =
-      await this.conversationRepository.save(conversation);
-
     // Create snapshot
     const fieldsSnapshot = form.fields.map((field) => ({
       id: field.id,
@@ -204,7 +217,7 @@ export class PrechatService {
     }));
 
     const snapshot = this.snapshotRepository.create({
-      conversationId: savedConversation.id,
+      conversationId: conversation.id,
       formId: form.id,
       formTitle: form.title,
       formDescription: form.description,
