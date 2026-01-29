@@ -36,6 +36,27 @@ async function bootstrap() {
       prefix: '/uploads/',
     });
 
+    // Add request timeout middleware (30 seconds)
+    app.use((req: any, res: any, next: any) => {
+      const timeout = parseInt(process.env.REQUEST_TIMEOUT || '30000', 10);
+      req.setTimeout(timeout);
+      res.setTimeout(timeout);
+      
+      const timeoutId = setTimeout(() => {
+        if (!res.headersSent) {
+          console.error(`⏱️ Request timeout: ${req.method} ${req.path}`);
+          res.status(504).json({
+            success: false,
+            message: 'Request timeout',
+            error: 'Gateway Timeout',
+          });
+        }
+      }, timeout);
+      
+      res.on('finish', () => clearTimeout(timeoutId));
+      next();
+    });
+
     // Enable global validation
     app.useGlobalPipes(
       new ValidationPipe({

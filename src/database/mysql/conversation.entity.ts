@@ -9,6 +9,7 @@ import {
   ManyToMany,
   JoinTable,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Visitor } from './visitor.entity';
 import { Agent } from './agent.entity';
@@ -24,6 +25,10 @@ export enum ConversationStatus {
 }
 
 @Entity('conversations')
+@Index('idx_conversations_status', ['status'])
+@Index('idx_conversations_assigned_agent', ['assignedAgentId'])
+@Index('idx_conversations_status_assigned', ['status', 'assignedAgentId'])
+@Index('idx_conversations_created', ['createdAt'])
 export class Conversation {
   @PrimaryGeneratedColumn('uuid')
   id: string;

@@ -34,53 +34,82 @@ export class PrechatService {
   ) {}
 
   async createForm(createDto: CreatePrechatFormDto): Promise<PrechatForm> {
-    // Verify group exists
-    const group = await this.groupRepository.findOne({
-      where: { id: createDto.groupId },
-    });
-
-    if (!group) {
-      throw new NotFoundException(
-        `Group with ID ${createDto.groupId} not found`,
-      );
-    }
-
-    // Create form with fields
-    const form = this.prechatFormRepository.create({
-      groupId: createDto.groupId,
-      title: createDto.title,
-      description: createDto.description,
-      isRequired: createDto.isRequired ?? false,
-      isActive: createDto.isActive ?? true,
-    });
-
-    const savedForm = await this.prechatFormRepository.save(form);
-
-    // Create fields
-    if (createDto.fields && createDto.fields.length > 0) {
-      const fields = createDto.fields.map((fieldDto, index) =>
-        this.prechatFormFieldRepository.create({
-          formId: savedForm.id,
-          label: fieldDto.label,
-          type: fieldDto.type,
-          isRequired: fieldDto.isRequired ?? false,
-          placeholder: fieldDto.placeholder,
-          options: fieldDto.options,
-          order: fieldDto.order ?? index,
+    try {
+      console.log('📝 Creating prechat form for group:', createDto.groupId);
+      
+      // Verify group exists with timeout
+      const group = await Promise.race([
+        this.groupRepository.findOne({
+          where: { id: createDto.groupId },
         }),
-      );
+        new Promise<null>((_, reject) => 
+          setTimeout(() => reject(new Error('Group lookup timeout')), 10000)
+        ),
+      ]);
 
-      await this.prechatFormFieldRepository.save(fields);
+      if (!group) {
+        throw new NotFoundException(
+          `Group with ID ${createDto.groupId} not found`,
+        );
+      }
+
+      // Create form with fields
+      const form = this.prechatFormRepository.create({
+        groupId: createDto.groupId,
+        title: createDto.title,
+        description: createDto.description,
+        isRequired: createDto.isRequired ?? false,
+        isActive: createDto.isActive ?? true,
+      });
+
+      console.log('💾 Saving prechat form...');
+      const savedForm = await this.prechatFormRepository.save(form);
+      console.log('✅ Form saved with ID:', savedForm.id);
+
+      // Create fields
+      if (createDto.fields && createDto.fields.length > 0) {
+        const fields = createDto.fields.map((fieldDto, index) =>
+          this.prechatFormFieldRepository.create({
+            formId: savedForm.id,
+            label: fieldDto.label,
+            type: fieldDto.type,
+            isRequired: fieldDto.isRequired ?? false,
+            placeholder: fieldDto.placeholder,
+            options: fieldDto.options,
+            order: fieldDto.order ?? index,
+          }),
+        );
+
+        console.log('💾 Saving', fields.length, 'form fields...');
+        await this.prechatFormFieldRepository.save(fields);
+        console.log('✅ Fields saved');
+      }
+
+      return this.findOne(savedForm.id);
+    } catch (error) {
+      console.error('❌ Error creating prechat form:', error);
+      throw error;
     }
-
-    return this.findOne(savedForm.id);
   }
 
   async findAll(): Promise<PrechatForm[]> {
-    return this.prechatFormRepository.find({
-      relations: ['group', 'fields'],
-      order: { createdAt: 'DESC' },
-    });
+    try {
+      console.log('📋 Fetching all prechat forms...');
+      const forms = await Promise.race([
+        this.prechatFormRepository.find({
+          relations: ['group', 'fields'],
+          order: { createdAt: 'DESC' },
+        }),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Database query timeout')), 15000)
+        ),
+      ]);
+      console.log('✅ Found', forms.length, 'forms');
+      return forms;
+    } catch (error) {
+      console.error('❌ Error fetching prechat forms:', error);
+      throw error;
+    }
   }
 
   async findByGroupId(groupId: string): Promise<PrechatForm | null> {

@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AssignmentQueueService } from './assignment-queue.service';
 import { QueueSchedulerService } from './queue-scheduler.service';
 import { QueueController } from './queue.controller';
 import { Agent } from '../database/mysql/agent.entity';
@@ -16,7 +15,7 @@ import { FirebaseModule } from '../firebase/firebase.module';
     FirebaseModule,
   ],
   controllers: [QueueController],
-  providers: [AssignmentQueueService, QueueSchedulerService],
-  exports: [AssignmentQueueService, QueueSchedulerService],
+  providers: [QueueSchedulerService],
+  exports: [QueueSchedulerService],
 })
 export class QueueModule {}

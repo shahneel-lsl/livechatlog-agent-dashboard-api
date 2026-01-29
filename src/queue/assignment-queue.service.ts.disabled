@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Queue, Worker } from 'bullmq';
@@ -10,9 +10,11 @@ import { ChatService } from '../chat/chat.service';
 
 @Injectable()
 export class AssignmentQueueService implements OnModuleInit {
-  private assignmentQueue: Queue;
-  private assignmentWorker: Worker;
-  private connection: Redis;
+  private readonly logger = new Logger(AssignmentQueueService.name);
+  private assignmentQueue: Queue | null = null;
+  private assignmentWorker: Worker | null = null;
+  private connection: Redis | null = null;
+  private isRedisAvailable = false;
 
   constructor(
     @InjectRepository(Agent)
@@ -23,22 +25,69 @@ export class AssignmentQueueService implements OnModuleInit {
     private conversationRepository: Repository<Conversation>,
     private chatService: ChatService,
   ) {
-    this.connection = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      maxRetriesPerRequest: null,
-    });
+    // Try to connect to Redis if configured
+    const redisHost = process.env.REDIS_HOST;
+    const redisPort = parseInt(process.env.REDIS_PORT || '6379');
 
-    this.assignmentQueue = new Queue('agent-assignment', {
-      connection: this.connection,
-    });
+    if (redisHost) {
+      try {
+        this.connection = new Redis({
+          host: redisHost,
+          port: redisPort,
+          maxRetriesPerRequest: 3,
+          retryStrategy: (times) => {
+            if (times > 3) {
+              this.logger.warn('Redis connection failed after 3 retries. Disabling BullMQ queue.');
+              return null; // Stop retrying
+            }
+            return Math.min(times * 100, 3000);
+          },
+          lazyConnect: true, // Don't connect immediately
+        });
+
+        // Test connection without blocking
+        this.connection.connect().then(() => {
+          this.isRedisAvailable = true;
+          this.logger.log('✅ Redis connected. BullMQ queue enabled.');
+          this.initializeQueue();
+        }).catch((error) => {
+          this.logger.warn('⚠️ Redis not available. BullMQ queue disabled. Using scheduler-based queue instead.');
+          this.isRedisAvailable = false;
+          this.connection = null;
+        });
+      } catch (error) {
+        this.logger.warn('⚠️ Redis initialization failed. BullMQ queue disabled.');
+        this.connection = null;
+      }
+    } else {
+      this.logger.log('ℹ️ REDIS_HOST not configured. Using scheduler-based queue (no Redis required).');
+    }
+  }
+
+  private initializeQueue() {
+    if (!this.connection || !this.isRedisAvailable) return;
+
+    try {
+      this.assignmentQueue = new Queue('agent-assignment', {
+        connection: this.connection,
+      });
+      this.logger.log('✅ BullMQ queue initialized');
+    } catch (error) {
+      this.logger.error('❌ Failed to initialize BullMQ queue:', error);
+    }
   }
 
   onModuleInit() {
-    this.startWorker();
+    if (this.isRedisAvailable) {
+      this.startWorker();
+    } else {
+      this.logger.log('ℹ️ Worker not started (Redis not available)');
+    }
   }
 
   private startWorker() {
+    if (!this.connection || !this.isRedisAvailable) return;
+
     this.assignmentWorker = new Worker(
       'agent-assignment',
       async (job) => {

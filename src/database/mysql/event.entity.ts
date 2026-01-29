@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Thread } from './thread.entity';
 import { Agent } from './agent.entity';
@@ -21,6 +22,8 @@ export enum EventAuthorType {
 }
 
 @Entity('events')
+@Index('idx_events_thread', ['threadId'])
+@Index('idx_events_thread_created', ['threadId', 'createdAt'])
 export class Event {
   @PrimaryGeneratedColumn('uuid')
   id: string;

@@ -19,6 +19,7 @@ import { CannedResponsesModule } from './canned-responses/canned-responses.modul
 import { WidgetBrandingModule } from './widget-branding/widget-branding.module';
 import { PrechatModule } from './prechat/prechat.module';
 import { QueueModule } from './queue/queue.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { QueueModule } from './queue/queue.module';
     WidgetBrandingModule,
     PrechatModule,
     QueueModule, // Queue scheduler for automatic agent assignment
+    AdminModule, // Admin endpoints for database operations
   ],
   controllers: [AppController],
   providers: [

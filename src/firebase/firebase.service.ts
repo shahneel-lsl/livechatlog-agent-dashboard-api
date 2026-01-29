@@ -63,15 +63,57 @@ export class FirebaseService implements OnModuleInit {
       createdAt: string;
       assignedAgentId?: string;
       assignedAgentName?: string;
+      visitor?: {
+        name?: string;
+        email?: string;
+        ipAddress?: string;
+        referrer?: string;
+        userAgent?: string;
+      };
+      assignedAgent?: {
+        id: string;
+        name: string;
+      };
+      priority?: string;
     },
   ): Promise<void> {
     const conversationRef = this.database.ref(
       `conversations/${conversationId}`,
     );
-    await conversationRef.set({
-      ...data,
+    
+    // Structure data for real-time updates
+    const conversationData: any = {
+      id: conversationId,
+      status: data.status,
+      createdAt: data.createdAt,
       updatedAt: admin.database.ServerValue.TIMESTAMP,
-    });
+    };
+
+    // Add visitor info
+    if (data.visitor) {
+      conversationData.visitor = data.visitor;
+    } else {
+      conversationData.visitor = {
+        name: data.visitorName || 'Unknown Visitor',
+        email: data.visitorEmail || '',
+      };
+    }
+
+    // Add assigned agent info
+    if (data.assignedAgentId) {
+      conversationData.assignedAgentId = data.assignedAgentId;
+      conversationData.assignedAgent = data.assignedAgent || {
+        id: data.assignedAgentId,
+        name: data.assignedAgentName || 'Unknown Agent',
+      };
+    }
+
+    // Add priority
+    if (data.priority) {
+      conversationData.priority = data.priority;
+    }
+
+    await conversationRef.set(conversationData);
   }
 
   /**
@@ -92,16 +134,39 @@ export class FirebaseService implements OnModuleInit {
       newThreadId?: string;
       reason?: string;
       tags?: Array<{ id: string; name: string; color?: string }>;
+      visitor?: {
+        name?: string;
+        email?: string;
+        ipAddress?: string;
+        referrer?: string;
+        userAgent?: string;
+      };
+      assignedAgent?: {
+        id: string;
+        name: string;
+      };
+      priority?: string;
       [key: string]: any; // Allow additional dynamic fields
     },
   ): Promise<void> {
     const conversationRef = this.database.ref(
       `conversations/${conversationId}`,
     );
-    await conversationRef.update({
+    
+    const updateData: any = {
       ...updates,
       updatedAt: admin.database.ServerValue.TIMESTAMP,
-    });
+    };
+
+    // Ensure assignedAgent object is properly structured
+    if (updates.assignedAgentId && !updates.assignedAgent) {
+      updateData.assignedAgent = {
+        id: updates.assignedAgentId,
+        name: updates.assignedAgentName || 'Unknown Agent',
+      };
+    }
+
+    await conversationRef.update(updateData);
   }
 
   /**

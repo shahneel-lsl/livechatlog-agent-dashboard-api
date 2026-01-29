@@ -7,6 +7,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Conversation } from './conversation.entity';
 import { Event } from './event.entity';
@@ -17,6 +18,9 @@ export enum ThreadStatus {
 }
 
 @Entity('threads')
+@Index('idx_threads_conversation', ['conversationId'])
+@Index('idx_threads_status', ['status'])
+@Index('idx_threads_conversation_status', ['conversationId', 'status'])
 export class Thread {
   @PrimaryGeneratedColumn('uuid')
   id: string;
