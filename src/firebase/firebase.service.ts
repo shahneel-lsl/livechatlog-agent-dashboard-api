@@ -144,6 +144,7 @@ export class FirebaseService implements OnModuleInit {
       assignedAgent?: {
         id: string;
         name: string;
+        email?: string;
       };
       priority?: string;
       [key: string]: any; // Allow additional dynamic fields
