@@ -145,6 +145,7 @@ export class FirebaseService implements OnModuleInit {
         id: string;
         name: string;
         email?: string;
+        avatar?: string;
       };
       priority?: string;
       [key: string]: any; // Allow additional dynamic fields
