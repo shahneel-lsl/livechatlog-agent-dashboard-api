@@ -62,6 +62,7 @@ export class ChatService {
         ipAddress: request?.ip || request?.connection?.remoteAddress,
         referrer: request?.headers?.referer,
         metadata: createWidgetSessionDto.metadata,
+        browsingHistory: createWidgetSessionDto.browsingHistory,
       });
 
       await queryRunner.manager.save(visitor, { reload: false });
@@ -84,6 +85,7 @@ export class ChatService {
         visitorId: visitor.id,
         groupId: group?.id,
         status: ConversationStatus.PENDING,
+        environment: createWidgetSessionDto.environment, // Store environment data
       });
 
       await queryRunner.manager.save(conversation, { reload: false });
@@ -105,6 +107,7 @@ export class ChatService {
         type: EventType.MESSAGE,
         authorType: EventAuthorType.VISITOR,
         content: createWidgetSessionDto.initialMessage,
+        metadata: createWidgetSessionDto.metadata || {},
       });
 
       await queryRunner.manager.save(event, { reload: false });
@@ -573,6 +576,7 @@ export class ChatService {
         visitorEmail: visitor.email,
         groupId: group?.id,
         status: conversation.status,
+        environment: conversation.environment, // Include environment data
         createdAt: new Date().toISOString(),
       });
       this.logger.log(`Firebase conversation created: ${conversation.id}`);

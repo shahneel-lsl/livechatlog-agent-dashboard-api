@@ -86,6 +86,13 @@ export class Conversation {
   @Column({ type: 'text', nullable: true })
   notes: string;
 
+  @Column({ type: 'json', nullable: true })
+  environment: {
+    os: { name: string; version?: string | null };
+    browser: { name: string; version?: string | null };
+    device?: { type: string };
+  };
+
   @CreateDateColumn()
   createdAt: Date;
 

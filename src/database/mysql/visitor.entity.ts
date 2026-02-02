@@ -34,6 +34,18 @@ export class Visitor {
   @Column({ type: 'json', nullable: true })
   metadata: Record<string, any>;
 
+  @Column({ type: 'json', nullable: true })
+  browsingHistory: {
+    visits: Array<{
+      path: string;
+      title: string;
+      enteredAt: number;
+      durationMs?: number;
+    }>;
+    initialReferrer: string;
+    source: 'direct' | 'referral' | 'unknown';
+  };
+
   @Column({ unique: true, length: 255 })
   sessionToken: string;
 
